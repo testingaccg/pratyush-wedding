@@ -14,6 +14,9 @@ import GuestConcierge from './components/GuestConcierge';
 import RsvpSection from './components/RsvpSection';
 import CoutureCrest from './components/CoutureCrest';
 import Toaster from './components/Toaster';
+import PetalButton from './components/PetalButton';
+import HostLinkMaker from './components/HostLinkMaker';
+import { IS_HOST } from './utils/guest';
 import { WEDDING_DATA } from './data/weddingData';
 
 export default function App() {
@@ -37,6 +40,7 @@ export default function App() {
         {!entered && <ShubhoDrishtiIntro onEnter={handleEnter} />}
 
         {entered && <Navbar />}
+        {entered && <PetalButton />}
 
         <MusicToggle isPlaying={musicPlaying} onToggle={() => setMusicPlaying((p) => !p)} />
         <Toaster />
@@ -53,10 +57,12 @@ export default function App() {
           <FiligreeDivider />
           <AttirePalette />
           <StoryGallery />
+          <FiligreeDivider />
           <CoupleQuiz />
           <GuestConcierge />
           <FiligreeDivider />
           <RsvpSection />
+          {IS_HOST && <HostLinkMaker />}
         </motion.main>
 
         <footer className="relative border-t border-kansa/45 bg-sindoor pb-28 pt-12 text-center text-ivory sm:pb-20">
@@ -64,6 +70,11 @@ export default function App() {
           <p className="font-script text-4xl text-ivory sm:text-5xl">
             {WEDDING_DATA.couple.groom} &amp; {WEDDING_DATA.couple.bride}
           </p>
+          {WEDDING_DATA.couple.bengaliNames && (
+            <p lang="bn" className="mt-1 font-bengali text-lg text-kansa-light">
+              {WEDDING_DATA.couple.bengaliNames}
+            </p>
+          )}
           <p className="mt-2 px-4 font-sans text-[11px] uppercase tracking-[0.26em] text-kansa-light">
             {WEDDING_DATA.couple.dateRange} · {WEDDING_DATA.couple.city} · Made with love
           </p>

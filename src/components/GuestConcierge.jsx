@@ -114,7 +114,6 @@ export default function GuestConcierge() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 'some' }}
               transition={{ duration: 0.55, delay: idx * 0.08, ease: LUXURY_EASE }}
-              whileHover={{ y: -4 }}
               className="alpona-frame flex flex-col bg-ivory p-5 shadow-sm transition-shadow hover:shadow-md"
             >
               <p className="font-sans text-[10px] font-semibold uppercase tracking-[0.22em] text-kansa-muted">{item.label}</p>

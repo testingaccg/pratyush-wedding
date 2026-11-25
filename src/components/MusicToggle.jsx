@@ -51,9 +51,6 @@ export default function MusicToggle({ isPlaying, onToggle }) {
         aria-pressed={!!isPlaying}
         className="group relative flex h-12 w-12 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kansa focus-visible:ring-offset-2 focus-visible:ring-offset-ivory items-center justify-center rounded-full border border-kansa/70 bg-sindoor text-kansa-light shadow-xl"
       >
-        {isPlaying && (
-          <span aria-hidden="true" className="pointer-events-none absolute inset-0 rounded-full border border-kansa/45 animate-ping opacity-40 motion-reduce:hidden" />
-        )}
         {isPlaying ? (
           <Volume2 className="h-5 w-5" />
         ) : (

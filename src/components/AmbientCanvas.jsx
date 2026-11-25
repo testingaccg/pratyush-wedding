@@ -39,14 +39,19 @@ export default function AmbientCanvas() {
 
     const bursts = [];
 
-    const onBurst = () => {
-      const n = reduceMq.matches ? 16 : 42;
+    // detail {x, y} (viewport px) bursts from that point, fanning up & inward;
+    // without it, a centred shower (used by the quiz).
+    const onBurst = (e) => {
+      if (bursts.length > 360) return; // rapid tapping can't snowball
+      const origin = e?.detail;
+      const n = reduceMq.matches ? 16 : origin ? 34 : 42;
+      const aim = origin ? (origin.x < W / 2 ? -Math.PI / 3 : (-2 * Math.PI) / 3) : -Math.PI / 2;
       for (let i = 0; i < n; i++) {
-        const angle = -Math.PI / 2 + (Math.random() - 0.5) * 1.9;
-        const speed = 3 + Math.random() * 6.5;
+        const angle = aim + (Math.random() - 0.5) * (origin ? 1.1 : 1.9);
+        const speed = origin ? 7 + Math.random() * 7 : 3 + Math.random() * 6.5;
         bursts.push({
-          x: W * (0.3 + Math.random() * 0.4),
-          y: H * 0.55,
+          x: origin ? origin.x : W * (0.3 + Math.random() * 0.4),
+          y: origin ? origin.y : H * 0.55,
           vx: Math.cos(angle) * speed,
           vy: Math.sin(angle) * speed - 2,
           size: 4 + Math.random() * 5,

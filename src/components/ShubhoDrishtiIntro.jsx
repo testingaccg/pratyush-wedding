@@ -1,10 +1,23 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion, useReducedMotion, useMotionValue, useTransform, animate } from 'framer-motion';
 import { WEDDING_DATA } from '../data/weddingData';
 import { soundEngine } from '../utils/soundEngine';
+import { GUEST } from '../utils/guest';
 
 const EASE = [0.22, 1, 0.36, 1];
-const DOOR_SWING = [0.65, 0, 0.25, 1];
+const TAP_SLOP = 6; // px of movement before a press becomes a drag
+const DRAG_MAX_DEG = 70; // how far the leaves follow the finger
+const OPEN_DEG = 108; // fully parted
+const COMMIT_PROGRESS = 0.35;
+const COMMIT_VELOCITY = 0.5; // px/ms
+
+const vibrate = (pattern) => {
+  try {
+    navigator.vibrate?.(pattern);
+  } catch {
+    /* unsupported, e.g. iOS */
+  }
+};
 
 /* Delicate gold corner flourish for the ivory folio */
 function CornerFlourish({ className = '' }) {
@@ -18,18 +31,15 @@ function CornerFlourish({ className = '' }) {
 }
 
 /* One carved, lacquered courtyard door leaf */
-function DoorLeaf({ side, patternId, opening, reduced }) {
+function DoorLeaf({ side, patternId, opening, reduced, rotateY }) {
   const isLeft = side === 'left';
   return (
     <motion.div
       initial={false}
-      animate={
-        reduced
-          ? { opacity: opening ? 0 : 1 }
-          : { rotateY: opening ? (isLeft ? -108 : 108) : 0 }
-      }
-      transition={{ duration: reduced ? 0.3 : 1.05, ease: DOOR_SWING }}
+      animate={reduced ? { opacity: opening ? 0 : 1 } : undefined}
+      transition={{ duration: 0.3 }}
       style={{
+        rotateY: reduced ? 0 : rotateY,
         transformOrigin: isLeft ? 'left center' : 'right center',
         backfaceVisibility: 'hidden',
         background: isLeft
@@ -78,6 +88,26 @@ export default function ShubhoDrishtiIntro({ onEnter }) {
   const entered = useRef(false);
   const patternId = `jali-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
 
+  // Door swing angle in degrees: follows the finger while dragging, then springs.
+  const angle = useMotionValue(0);
+  const leftRotate = useTransform(angle, (a) => -a);
+  const seamOpacity = useTransform(angle, [0, DRAG_MAX_DEG, OPEN_DEG], [0.8, 1, 0]);
+  const seamGlow = useTransform(
+    angle,
+    [0, DRAG_MAX_DEG],
+    ['0 0 10px 3px rgba(255,220,140,0.55)', '0 0 34px 14px rgba(255,232,165,0.95)']
+  );
+  const sealScale = useTransform(angle, [0, DRAG_MAX_DEG], [1, 1.14]);
+  // Seal lifts away early so it never muddies the names revealed behind it
+  const sealFade = useTransform(angle, [0, DRAG_MAX_DEG * 0.45, DRAG_MAX_DEG], [1, 0.15, 0]);
+  const namesOpacity = useTransform(angle, [0, DRAG_MAX_DEG], [0.4, 0.9]);
+
+  const drag = useRef(null); // { id, x0, width, dragging, crossed, samples }
+  const suppressClick = useRef(false);
+  const [coarse] = useState(
+    () => typeof window !== 'undefined' && !!window.matchMedia?.('(pointer: coarse)').matches
+  );
+
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
@@ -93,20 +123,101 @@ export default function ShubhoDrishtiIntro({ onEnter }) {
     onEnter();
   };
 
+  // Must run synchronously inside the pointerup/click handler (iOS audio unlock).
   const handleOpen = () => {
     if (opening) return;
     setOpening(true);
     // Enables SFX, plays the door chime and starts music inside the user gesture (iOS autoplay)
     soundEngine.beginCelebration();
+    if (!reduced) {
+      vibrate([12, 40, 18]);
+      animate(angle, OPEN_DEG, { type: 'spring', stiffness: 90, damping: 17, mass: 1 });
+    }
     // Safety net in case the fade's completion callback never fires
     setTimeout(finish, reduced ? 500 : 1600);
   };
+
+  /* ---- Swipe-to-part gesture ---- */
+  const onPointerDown = (e) => {
+    suppressClick.current = false;
+    if (reduced || opening || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    angle.stop();
+    drag.current = {
+      id: e.pointerId,
+      x0: e.clientX,
+      width: e.currentTarget.getBoundingClientRect().width,
+      dragging: false,
+      crossed: false,
+      samples: [{ x: e.clientX, t: e.timeStamp }],
+    };
+  };
+
+  const onPointerMove = (e) => {
+    const d = drag.current;
+    if (!d || d.id !== e.pointerId) return;
+    const dx = e.clientX - d.x0;
+    if (!d.dragging) {
+      if (Math.abs(dx) < TAP_SLOP) return;
+      d.dragging = true;
+      e.currentTarget.setPointerCapture?.(e.pointerId);
+    }
+    const p = Math.min(1, Math.abs(dx) / (d.width * 0.6));
+    angle.set(p * DRAG_MAX_DEG);
+    if (!d.crossed && p > COMMIT_PROGRESS) {
+      d.crossed = true;
+      vibrate(8);
+    } else if (d.crossed && p < COMMIT_PROGRESS) {
+      d.crossed = false;
+    }
+    d.samples.push({ x: e.clientX, t: e.timeStamp });
+    if (d.samples.length > 6) d.samples.shift();
+  };
+
+  const springBack = () => animate(angle, 0, { type: 'spring', stiffness: 260, damping: 22 });
+
+  const onPointerUp = (e) => {
+    const d = drag.current;
+    drag.current = null;
+    if (!d || d.id !== e.pointerId || !d.dragging) return;
+    suppressClick.current = true; // the click that follows a drag must not re-open
+    const p = Math.min(1, Math.abs(e.clientX - d.x0) / (d.width * 0.6));
+    // Outward speed over the last ~100ms
+    const recent = d.samples.filter((smp) => e.timeStamp - smp.t < 100);
+    const first = recent[0] || d.samples[0];
+    const dt = Math.max(1, e.timeStamp - first.t);
+    const velocity = (Math.abs(e.clientX - d.x0) - Math.abs(first.x - d.x0)) / dt;
+    if (p > COMMIT_PROGRESS || velocity > COMMIT_VELOCITY) {
+      handleOpen(); // synchronous: keeps the gesture's audio permission
+    } else {
+      springBack();
+    }
+  };
+
+  const onPointerCancel = () => {
+    if (drag.current?.dragging) springBack();
+    drag.current = null;
+  };
+
+  const onClick = () => {
+    if (suppressClick.current) {
+      suppressClick.current = false;
+      return;
+    }
+    handleOpen();
+  };
+
+  const hasGuest = !!GUEST.name;
+  const hint = reduced
+    ? 'Tap the doors to enter'
+    : coarse
+      ? 'Swipe the doors apart'
+      : 'Tap or part the doors to enter';
 
   return (
     <motion.div
       role="dialog"
       aria-modal="true"
-      aria-label="Wedding invitation"
+      aria-label={hasGuest ? `Wedding invitation for ${GUEST.name}` : 'Wedding invitation'}
       initial={{ opacity: 1 }}
       animate={{ opacity: opening ? 0 : 1, scale: opening && !reduced ? 1.035 : 1 }}
       transition={{
@@ -174,9 +285,20 @@ export default function ShubhoDrishtiIntro({ onEnter }) {
         <CornerFlourish className="bottom-3 left-3 -rotate-90" />
         <CornerFlourish className="bottom-3 right-3 rotate-180" />
 
-        <p className="font-sans text-[11px] font-semibold uppercase tracking-[0.3em] text-kansa-muted">
-          The Wedding Celebration Of
-        </p>
+        {hasGuest ? (
+          <>
+            <p className="line-clamp-2 max-w-full break-words px-2 font-script text-3xl leading-tight text-sindoor">
+              Dearest {GUEST.name}
+            </p>
+            <p className="mt-1.5 font-sans text-[10px] font-semibold uppercase tracking-[0.26em] text-kansa-muted">
+              You are invited to the wedding of
+            </p>
+          </>
+        ) : (
+          <p className="font-sans text-[11px] font-semibold uppercase tracking-[0.3em] text-kansa-muted">
+            The Wedding Celebration Of
+          </p>
+        )}
         <div aria-hidden="true" className="mt-3 flex items-center gap-2 text-kansa">
           <span className="h-px w-10 bg-gradient-to-r from-transparent to-kansa" />
           <span className="text-[10px]">✦</span>
@@ -186,11 +308,17 @@ export default function ShubhoDrishtiIntro({ onEnter }) {
         {/* Interactive twin carved doors */}
         <button
           ref={doorRef}
-          onClick={handleOpen}
+          onClick={onClick}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerCancel}
           aria-label="Open the wedding invitation doors"
-          className="group relative mt-5 mb-6 block aspect-[3/4] w-[min(70vw,17.5rem)] sm:aspect-[5/6] rounded-t-full p-[5px] focus:outline-none focus-visible:ring-2 focus-visible:ring-kansa focus-visible:ring-offset-4 focus-visible:ring-offset-ivory"
+          className="group select-none relative mt-5 mb-6 block aspect-[3/4] w-[min(70vw,17.5rem)] sm:aspect-[5/6] rounded-t-full p-[5px] focus:outline-none focus-visible:ring-2 focus-visible:ring-kansa focus-visible:ring-offset-4 focus-visible:ring-offset-ivory"
           style={{
             background: 'linear-gradient(160deg, #E6CA7E 0%, #C59B38 35%, #8F6D22 65%, #E6CA7E 100%)',
+            touchAction: 'none',
+            WebkitTouchCallout: 'none',
           }}
         >
           <svg width="0" height="0" className="absolute" aria-hidden="true">
@@ -231,7 +359,11 @@ export default function ShubhoDrishtiIntro({ onEnter }) {
             />
             <motion.div
               initial={false}
-              animate={{ scale: opening ? 1.04 : 0.92, opacity: opening ? 1 : 0.4 }}
+              animate={{
+                scale: opening ? 1.04 : 0.92,
+                ...(opening || reduced ? { opacity: opening ? 1 : 0.4 } : {}),
+              }}
+              style={opening || reduced ? undefined : { opacity: namesOpacity }}
               transition={{ duration: 0.8, delay: opening ? 0.15 : 0, ease: EASE }}
               className="absolute inset-0 flex flex-col items-center justify-center px-3"
             >
@@ -245,26 +377,42 @@ export default function ShubhoDrishtiIntro({ onEnter }) {
               <span className="mt-2 font-sans text-[10px] font-semibold uppercase tracking-[0.22em] text-sindoor-deep">
                 {WEDDING_DATA.couple.dateRange}
               </span>
+              {hasGuest && (
+                <span className="mt-1.5 block max-w-full truncate px-4 font-serif text-sm italic text-sindoor-deep">
+                  Welcome, {GUEST.name}
+                </span>
+              )}
             </motion.div>
 
             {/* Warm light leaking through the seam */}
             <motion.div
               aria-hidden="true"
               initial={false}
-              animate={{ opacity: opening ? 0 : 1 }}
+              animate={reduced ? { opacity: opening ? 0 : 0.8 } : undefined}
+              style={reduced ? undefined : { opacity: seamOpacity, boxShadow: seamGlow }}
               transition={{ duration: 0.4 }}
-              className="absolute inset-y-0 left-1/2 z-[5] w-[3px] -translate-x-1/2 bg-gradient-to-b from-transparent via-[#FFE9A8] to-transparent opacity-80 shadow-[0_0_10px_3px_rgba(255,220,140,0.55)] transition-[box-shadow,filter] duration-500 group-hover:shadow-[0_0_18px_6px_rgba(255,225,150,0.85)] group-focus-visible:shadow-[0_0_18px_6px_rgba(255,225,150,0.85)]"
+              className="absolute inset-y-0 left-1/2 z-[5] w-[3px] -translate-x-1/2 bg-gradient-to-b from-transparent via-[#FFE9A8] to-transparent"
+            />
+            {/* Hover/focus bloom on the seam (separate layer so it doesn't fight the drag glow) */}
+            <div
+              aria-hidden="true"
+              className={`pointer-events-none absolute inset-y-0 left-1/2 z-[5] w-[3px] -translate-x-1/2 opacity-0 shadow-[0_0_18px_6px_rgba(255,225,150,0.85)] transition-opacity duration-500 ${
+                opening ? '' : 'group-hover:opacity-100 group-focus-visible:opacity-100'
+              }`}
             />
 
-            <DoorLeaf side="left" patternId={patternId} opening={opening} reduced={reduced} />
-            <DoorLeaf side="right" patternId={patternId} opening={opening} reduced={reduced} />
+            <DoorLeaf side="left" patternId={patternId} opening={opening} reduced={reduced} rotateY={leftRotate} />
+            <DoorLeaf side="right" patternId={patternId} opening={opening} reduced={reduced} rotateY={angle} />
 
             {/* Arch keystone shadow */}
             <div aria-hidden="true" className="pointer-events-none absolute inset-0 rounded-t-full shadow-[inset_0_6px_14px_rgba(0,0,0,0.35)]" />
           </div>
 
           {/* Wax-seal medallion over the seam */}
-          <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
+          <motion.div
+            style={reduced ? undefined : { scale: sealScale, opacity: sealFade }}
+            className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center"
+          >
             <motion.div
               initial={false}
               animate={{ opacity: opening ? 0 : 1, scale: opening ? 1.35 : 1 }}
@@ -280,7 +428,7 @@ export default function ShubhoDrishtiIntro({ onEnter }) {
                 {WEDDING_DATA.couple.monogram}
               </span>
             </motion.div>
-          </div>
+          </motion.div>
         </button>
 
         <motion.p
@@ -288,7 +436,7 @@ export default function ShubhoDrishtiIntro({ onEnter }) {
           transition={reduced || opening ? { duration: 0.2 } : { duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
           className="font-sans text-[11px] font-semibold uppercase tracking-[0.26em] text-sindoor"
         >
-          Tap the doors to enter
+          {hint}
         </motion.p>
         <p className="mt-1.5 font-serif text-base italic text-ink/75">
           {WEDDING_DATA.couple.dateRange} · {WEDDING_DATA.couple.city}

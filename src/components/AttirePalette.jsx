@@ -168,7 +168,6 @@ export default function AttirePalette() {
                   initial={{ opacity: 0, scale: 0.92 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.35, delay: idx * 0.06 }}
-                  whileHover={{ y: -4 }}
                   className="flex flex-col items-center rounded-sm border border-kansa/35 bg-cream/60 p-3 text-center shadow-sm"
                 >
                   <div

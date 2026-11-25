@@ -1,5 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  // Gate every hover: variant behind @media (hover: hover) — no sticky hover after a tap on phones
+  future: { hoverOnlyWhenSupported: true },
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -22,6 +24,12 @@ export default {
         },
         indigoNight: '#1B263B',
         ink: '#24191A',
+      },
+      transitionTimingFunction: {
+        DEFAULT: 'cubic-bezier(0.23, 1, 0.32, 1)', // strong ease-out
+      },
+      transitionDuration: {
+        DEFAULT: '200ms',
       },
       fontFamily: {
         script: ['"Great Vibes"', 'cursive'],

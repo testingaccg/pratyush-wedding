@@ -111,7 +111,8 @@
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: foil-text-sweep 7s cubic-bezier(0.22, 1, 0.36, 1) 1.2s infinite;
+  /* Three passes, then rests as solid sindoor — no perpetual motion on the most-seen element */
+  animation: foil-text-sweep 7s cubic-bezier(0.22, 1, 0.36, 1) 1.2s 3 both;
 }
 
 @keyframes foil-text-sweep {

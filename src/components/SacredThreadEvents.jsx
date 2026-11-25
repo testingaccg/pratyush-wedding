@@ -1,6 +1,13 @@
-import { useRef, useState } from 'react';
-import { motion, AnimatePresence, useScroll, useSpring } from 'framer-motion';
-import { MapPin, CalendarPlus, CalendarHeart, Sparkles, Check, Flame } from 'lucide-react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import {
+  motion,
+  AnimatePresence,
+  useScroll,
+  useSpring,
+  useMotionValueEvent,
+  useReducedMotion,
+} from 'framer-motion';
+import { MapPin, CalendarPlus, CalendarHeart, Sparkles, Flame } from 'lucide-react';
 import { WEDDING_DATA } from '../data/weddingData';
 import { soundEngine } from '../utils/soundEngine';
 import { googleCalendarUrl, downloadWeddingIcs } from '../utils/calendar';
@@ -160,6 +167,7 @@ function SaptapadiReveal({ onReveal }) {
     soundEngine.playSaatPaakStep(step);
     setStep(next);
     if (next >= 7) {
+      setTimeout(() => soundEngine.playShankha(), 350);
       setTimeout(onReveal, 420);
     }
   };
@@ -201,6 +209,7 @@ function SaptapadiReveal({ onReveal }) {
       <button
         onClick={() => {
           soundEngine.playSaatPaakStep(6);
+          soundEngine.playShankha();
           onReveal();
         }}
         className="mt-2 min-h-[44px] px-2 font-sans text-[11px] font-semibold uppercase tracking-[0.2em] text-sindoor underline underline-offset-4 hover:text-kansa-muted"
@@ -229,7 +238,7 @@ function DiyaReveal({ onReveal }) {
         aria-label="Tap to light the diya for The Reception"
         whileHover={{ scale: 1.07 }}
         whileTap={{ scale: 0.93 }}
-        className={`relative flex h-28 w-28 items-center justify-center rounded-full border-2 transition-all duration-500 ${
+        className={`relative flex h-28 w-28 items-center justify-center rounded-full border-2 transition-[background-color,border-color,box-shadow,color] duration-500 ${
           lit
             ? 'border-kansa bg-sindoor text-kansa-light shadow-[0_0_40px_rgba(197,155,56,0.7)]'
             : 'border-terracotta/60 bg-cream text-terracotta'
@@ -252,9 +261,246 @@ function DiyaReveal({ onReveal }) {
   );
 }
 
+
+/* ---------- The Sacred Thread (kalava / mauli) ---------- */
+
+const THREAD_W = 28; // svg width; thread centre at x = 14
+const CX = THREAD_W / 2;
+const PAD = 8;
+
+/** One strand twisting around the centre line; two at 180° look braided. */
+function strandPath(height, phase, amp = 3.2, wavelength = 34) {
+  if (height <= PAD * 2) return '';
+  const pts = [];
+  for (let y = PAD; y <= height - PAD; y += 4) {
+    const x = CX + amp * Math.sin(((y - PAD) / wavelength) * Math.PI * 2 + phase);
+    pts.push(`${x.toFixed(2)} ${y}`);
+  }
+  return `M${pts.join(' L')}`;
+}
+
+/* A granthi (sacred knot): figure-eight loop in sindoor with a gold bead. */
+function Knot({ y, tied, revealed, reduced }) {
+  return (
+    <div
+      aria-hidden="true"
+      className="absolute flex h-[30px] w-[30px] items-center justify-center"
+      style={{ top: y - 15, left: CX - 15 }}
+    >
+      {/* Untied: faint dotted ring */}
+      <motion.svg
+        viewBox="0 0 30 30"
+        className="absolute inset-0 h-full w-full"
+        initial={false}
+        animate={{ opacity: tied ? 0 : 1 }}
+        transition={{ duration: 0.3 }}
+      >
+        <circle
+          cx="15"
+          cy="15"
+          r="9"
+          fill="#FAF7F2"
+          stroke="#C59B38"
+          strokeOpacity="0.55"
+          strokeWidth="1.2"
+          strokeDasharray="1.6 2.4"
+        />
+        <circle cx="15" cy="15" r="1.6" fill="#C59B38" opacity="0.5" />
+      </motion.svg>
+
+      {tied && (
+        <motion.svg
+          viewBox="0 0 30 30"
+          className="absolute inset-0 h-full w-full overflow-visible"
+          initial={reduced ? false : { scale: 0.6, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 420, damping: 11 }}
+        >
+          {/* gold sparkle ring released as the knot ties */}
+          {!reduced && (
+            <motion.circle
+              cx="15"
+              cy="15"
+              fill="none"
+              stroke="#E6CA7E"
+              strokeWidth="1.2"
+              initial={{ r: 7, opacity: 0.95 }}
+              animate={{ r: 19, opacity: 0 }}
+              transition={{ duration: 0.8, ease: 'easeOut' }}
+            />
+          )}
+          {/* revealed: warm cream halo behind the knot */}
+          <motion.circle
+            cx="15"
+            cy="15"
+            r="12.5"
+            initial={false}
+            animate={{ opacity: revealed ? 1 : 0 }}
+            transition={{ duration: reduced ? 0 : 0.45 }}
+            fill="#F3ECE1"
+            stroke="#C59B38"
+            strokeWidth="1"
+          />
+          <circle cx="15" cy="15" r="10" fill="#FAF7F2" opacity={revealed ? 0 : 0.92} />
+          {/* figure-eight granthi loop */}
+          <motion.path
+            d="M6 15 C6 8.5 13 8.5 15 15 C17 21.5 24 21.5 24 15 C24 8.5 17 8.5 15 15 C13 21.5 6 21.5 6 15 Z"
+            fill="none"
+            stroke="#A61C24"
+            strokeWidth="2.1"
+            strokeLinecap="round"
+            initial={reduced ? false : { pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ duration: reduced ? 0 : 0.6, ease: LUXURY_EASE }}
+          />
+          <motion.path
+            d="M6 15 C6 8.5 13 8.5 15 15 C17 21.5 24 21.5 24 15"
+            fill="none"
+            stroke="#E6CA7E"
+            strokeWidth="0.7"
+            strokeLinecap="round"
+            opacity="0.85"
+            initial={reduced ? false : { pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ duration: reduced ? 0 : 0.6, delay: reduced ? 0 : 0.1 }}
+          />
+          {/* gold bead */}
+          <circle cx="15" cy="15" r="2.9" fill="#C59B38" stroke="#8F6D22" strokeWidth="0.6" />
+          <circle cx="14.1" cy="14.1" r="0.9" fill="#FFF3C9" />
+          {revealed && (
+            <motion.circle
+              cx="15"
+              cy="15"
+              r="4.6"
+              fill="none"
+              stroke="#E6CA7E"
+              strokeWidth="1.3"
+              initial={false}
+              animate={reduced ? { opacity: 0.85 } : { opacity: [0.35, 1, 0.35] }}
+              transition={reduced ? { duration: 0 } : { duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+            />
+          )}
+        </motion.svg>
+      )}
+    </div>
+  );
+}
+
+function SacredThread({ containerRef, itemRefs, progress, revealedIds }) {
+  const reduced = useReducedMotion();
+  const [height, setHeight] = useState(0);
+  const [knotYs, setKnotYs] = useState([]);
+  const [tiedCount, setTiedCount] = useState(0);
+  const knotYsRef = useRef([]);
+  const heightRef = useRef(0);
+
+  // Measure only on mount/resize — never on scroll.
+  const measure = useCallback(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const h = el.offsetHeight;
+    const ys = itemRefs.current.map((n) => (n ? n.offsetTop + 40 : 0));
+    heightRef.current = h;
+    knotYsRef.current = ys;
+    setHeight((prev) => (prev === h ? prev : h));
+    setKnotYs((prev) => (prev.length === ys.length && prev.every((v, i) => v === ys[i]) ? prev : ys));
+  }, [containerRef, itemRefs]);
+
+  useLayoutEffect(() => {
+    measure();
+    if (typeof ResizeObserver === 'undefined') return undefined;
+    const ro = new ResizeObserver(() => measure());
+    if (containerRef.current) ro.observe(containerRef.current);
+    itemRefs.current.forEach((n) => n && ro.observe(n));
+    return () => ro.disconnect();
+  }, [measure, containerRef, itemRefs]);
+
+  const updateTied = useCallback((v) => {
+    const h = heightRef.current;
+    if (!h) return;
+    const drawnY = PAD + v * (h - PAD * 2);
+    const n = knotYsRef.current.filter((y) => y <= drawnY + 2).length;
+    setTiedCount((prev) => (n > prev ? n : prev)); // once tied, stays tied
+  }, []);
+
+  useMotionValueEvent(progress, 'change', updateTied);
+  useEffect(() => {
+    updateTied(progress.get());
+  }, [knotYs, progress, updateTied]);
+
+  const strandA = strandPath(height, 0);
+  const strandB = strandPath(height, Math.PI);
+  const strandHi = strandPath(height, Math.PI / 2, 1.5);
+  const drawn = reduced ? 1 : progress;
+
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-y-0 left-0 z-10 sm:left-[10px]"
+      style={{ width: THREAD_W }}
+    >
+      {height > 0 && (
+        <svg
+          width={THREAD_W}
+          height={height}
+          viewBox={`0 0 ${THREAD_W} ${height}`}
+          className="absolute inset-0 overflow-visible"
+        >
+          {/* faint guide where the thread will run */}
+          <line
+            x1={CX}
+            y1={PAD}
+            x2={CX}
+            y2={height - PAD}
+            stroke="#C59B38"
+            strokeOpacity="0.25"
+            strokeWidth="1"
+            strokeDasharray="2 5"
+          />
+          <motion.path
+            d={strandB}
+            fill="none"
+            stroke="#C59B38"
+            strokeWidth="2"
+            strokeLinecap="round"
+            style={{ pathLength: drawn }}
+          />
+          <motion.path
+            d={strandA}
+            fill="none"
+            stroke="#A61C24"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            style={{ pathLength: drawn }}
+          />
+          <motion.path
+            d={strandHi}
+            fill="none"
+            stroke="#FAF7F2"
+            strokeOpacity="0.6"
+            strokeWidth="0.7"
+            strokeLinecap="round"
+            style={{ pathLength: drawn }}
+          />
+        </svg>
+      )}
+      {knotYs.map((y, i) => (
+        <Knot
+          key={WEDDING_DATA.events[i]?.id ?? i}
+          y={y}
+          tied={reduced || i < tiedCount}
+          revealed={revealedIds.includes(WEDDING_DATA.events[i]?.id)}
+          reduced={reduced}
+        />
+      ))}
+    </div>
+  );
+}
+
 export default function SacredThreadEvents() {
   const [revealedIds, setRevealedIds] = useState([]);
   const timelineRef = useRef(null);
+  const itemRefs = useRef([]);
   const { scrollYProgress } = useScroll({
     target: timelineRef,
     offset: ['start 75%', 'end 65%'],
@@ -323,14 +569,11 @@ export default function SacredThreadEvents() {
       </motion.div>
 
       <div ref={timelineRef} className="relative mt-14 space-y-10">
-        <div
-          aria-hidden="true"
-          className="absolute bottom-8 left-6 top-8 hidden w-px bg-kansa/20 sm:block"
-        />
-        <motion.div
-          aria-hidden="true"
-          style={{ scaleY: threadProgress }}
-          className="absolute bottom-8 left-6 top-8 hidden w-0.5 origin-top bg-gradient-to-b from-sindoor via-kansa to-sindoor sm:block"
+        <SacredThread
+          containerRef={timelineRef}
+          itemRefs={itemRefs}
+          progress={threadProgress}
+          revealedIds={revealedIds}
         />
 
         {WEDDING_DATA.events.map((ev, index) => {
@@ -339,25 +582,16 @@ export default function SacredThreadEvents() {
           return (
             <motion.div
               key={ev.id}
+              ref={(n) => {
+                itemRefs.current[index] = n;
+              }}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 'some' }}
               transition={{ duration: 0.5, delay: index * 0.04, ease: LUXURY_EASE }}
-              className="relative sm:pl-16"
+              className="relative pl-9 sm:pl-16"
             >
-              <motion.div
-                animate={isRevealed ? { scale: [1, 1.25, 1] } : {}}
-                transition={{ duration: 0.4 }}
-                className={`absolute left-3.5 top-8 hidden h-5 w-5 items-center justify-center rounded-full border transition-colors sm:flex ${
-                  isRevealed
-                    ? 'border-sindoor bg-sindoor text-ivory shadow-[0_0_12px_rgba(166,28,36,0.45)]'
-                    : 'border-kansa bg-ivory text-sindoor'
-                }`}
-              >
-                {isRevealed ? <Check className="h-3 w-3" /> : <span className="h-1.5 w-1.5 rounded-full bg-sindoor" />}
-              </motion.div>
-
-              <div className="rajbari-frame group bg-ivory p-6 shadow-sm transition-shadow duration-500 hover:shadow-xl sm:p-8">
+              <div className="rajbari-frame group bg-ivory p-5 shadow-sm transition-shadow duration-500 hover:shadow-xl sm:p-8">
                 <div className="flex flex-wrap items-center justify-between gap-2 border-b border-kansa/25 pb-4">
                   <div>
                     <span className="font-sans text-[10px] font-semibold uppercase tracking-[0.26em] text-kansa-muted">
@@ -438,7 +672,7 @@ export default function SacredThreadEvents() {
                           rel="noreferrer"
                           onClick={() => soundEngine.playSoftTick()}
                           aria-label={`Get directions to ${ev.venue} for ${ev.title}`}
-                          className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-sindoor px-4 font-sans text-[11px] font-semibold uppercase tracking-[0.18em] text-ivory transition-all hover:-translate-y-0.5 hover:bg-sindoor-deep"
+                          className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-sindoor px-4 font-sans text-[11px] font-semibold uppercase tracking-[0.18em] text-ivory transition-[transform,background-color,box-shadow] active:scale-[0.97] hover:-translate-y-0.5 hover:bg-sindoor-deep"
                         >
                           <MapPin aria-hidden="true" className="h-3.5 w-3.5 text-kansa-light" />
                           Get Directions
@@ -451,7 +685,7 @@ export default function SacredThreadEvents() {
                             rel="noreferrer"
                             onClick={() => soundEngine.playSoftTick()}
                             aria-label={`Add ${ev.title} to Google Calendar`}
-                            className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-kansa bg-cream px-4 font-sans text-[11px] font-semibold uppercase tracking-[0.18em] text-sindoor transition-all hover:-translate-y-0.5 hover:bg-kansa/20"
+                            className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-kansa bg-cream px-4 font-sans text-[11px] font-semibold uppercase tracking-[0.18em] text-sindoor transition-[transform,background-color,box-shadow] active:scale-[0.97] hover:-translate-y-0.5 hover:bg-kansa/20"
                           >
                             <CalendarPlus aria-hidden="true" className="h-3.5 w-3.5" />
                             Add to Calendar

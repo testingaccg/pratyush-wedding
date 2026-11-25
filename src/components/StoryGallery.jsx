@@ -232,7 +232,7 @@ export default function StoryGallery() {
                   onClick={() => openAt(i)}
                   aria-label={`View story ${i + 1}: ${g.title}`}
                   aria-current={i === activeIdx ? 'true' : undefined}
-                  className={`relative h-12 w-16 shrink-0 overflow-hidden rounded-sm border-2 transition-all ${
+                  className={`relative h-12 w-16 shrink-0 overflow-hidden rounded-sm border-2 transition-[transform,opacity,border-color] ${
                     i === activeIdx
                       ? 'scale-105 border-kansa-light shadow-lg'
                       : 'border-ivory/25 opacity-60 hover:opacity-100'

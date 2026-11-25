@@ -3,6 +3,8 @@ export const WEDDING_DATA = {
     groom: 'Pratyush',
     bride: 'Sayanee',
     monogram: 'P · S',
+    // ✏️ Please confirm the Bengali spellings with the families.
+    bengaliNames: 'প্রত্যূষ ও সায়নী',
     hashtag: '#PratyushWedsSayanee',
     tagline: 'Two souls, one timeless rhythm',
     dateRange: '14 — 17 February 2027',

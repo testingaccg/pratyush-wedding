@@ -1,4 +1,5 @@
 import { WEDDING_DATA } from '../data/weddingData';
+import { isWeddingDay } from './schedule';
 
 /**
  * Wedding Music & Tactile Ritual Sound Engine
@@ -41,6 +42,8 @@ class WeddingSoundEngine {
     this.sfxEnabled = true;
     this.ensureContext();
     this.playShubhoDrishti();
+    // On the wedding day itself, the doors open to the call of the shankha.
+    if (isWeddingDay()) setTimeout(() => this.playShankha(), 700);
     this.startMusic();
   }
 
@@ -338,6 +341,81 @@ class WeddingSoundEngine {
     [349.23, 440.0, 523.25, 698.46].forEach((f, idx) => {
       setTimeout(() => this.playWarmPiano(f, 2.4, 0.07), idx * 95);
     });
+  }
+
+  /* Shankha (conch) — the auspicious Bengali call. A breathy, horn-like
+     sustained tone with a formant filter, slow swell and a final upward
+     lift, blown twice. */
+  playShankha() {
+    if (!this.sfxEnabled) return;
+    const ctx = this.ensureContext();
+    if (!ctx) return;
+
+    const blow = (start, dur, base) => {
+      const t = ctx.currentTime + start;
+      const out = ctx.createGain();
+      out.gain.setValueAtTime(0.0001, t);
+      out.gain.linearRampToValueAtTime(0.11, t + 0.32);
+      out.gain.setValueAtTime(0.11, t + dur - 0.45);
+      out.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+
+      // Formants give the hollow conch-shell colour
+      const f1 = ctx.createBiquadFilter();
+      f1.type = 'bandpass';
+      f1.frequency.setValueAtTime(720, t);
+      f1.Q.setValueAtTime(3.2, t);
+      const f2 = ctx.createBiquadFilter();
+      f2.type = 'bandpass';
+      f2.frequency.setValueAtTime(1180, t);
+      f2.Q.setValueAtTime(5, t);
+      const f2Gain = ctx.createGain();
+      f2Gain.gain.setValueAtTime(0.5, t);
+
+      const vib = ctx.createOscillator();
+      const vibGain = ctx.createGain();
+      vib.frequency.setValueAtTime(5.2, t);
+      vibGain.gain.setValueAtTime(2.2, t);
+      vib.connect(vibGain);
+
+      [1, 2, 3].forEach((h) => {
+        const osc = ctx.createOscillator();
+        osc.type = h === 1 ? 'sawtooth' : 'triangle';
+        osc.frequency.setValueAtTime(base * h * 0.985, t);
+        osc.frequency.linearRampToValueAtTime(base * h, t + 0.3);
+        osc.frequency.setValueAtTime(base * h, t + dur - 0.55);
+        osc.frequency.linearRampToValueAtTime(base * h * 1.06, t + dur - 0.1); // the lift
+        vibGain.connect(osc.frequency);
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(1 / (h * 1.4), t);
+        osc.connect(g);
+        g.connect(f1);
+        g.connect(f2);
+        osc.start(t);
+        osc.stop(t + dur + 0.05);
+      });
+
+      // Breath noise
+      const len = Math.floor(ctx.sampleRate * dur);
+      const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * 0.35;
+      const noise = ctx.createBufferSource();
+      noise.buffer = buf;
+      noise.connect(f1);
+
+      f1.connect(out);
+      f2.connect(f2Gain);
+      f2Gain.connect(out);
+      out.connect(this.master);
+      out.connect(this.reverbSend);
+      vib.start(t);
+      vib.stop(t + dur + 0.05);
+      noise.start(t);
+      noise.stop(t + dur);
+    };
+
+    blow(0, 1.6, 233.08); // B♭3
+    blow(1.85, 2.4, 233.08);
   }
 
   playSoftTick() {

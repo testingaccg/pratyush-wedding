@@ -6,6 +6,7 @@ import { soundEngine } from '../utils/soundEngine';
 import { useModal } from '../utils/useModal';
 import { renderPassBlob, passFileName } from '../utils/passCanvas';
 import { toast } from '../utils/toast';
+import { GUEST } from '../utils/guest';
 
 const LUXURY_EASE = [0.22, 1, 0.36, 1];
 const MAX_GUESTS = 10;
@@ -28,9 +29,10 @@ export default function RsvpSection() {
   const errId = `${uid}-err`;
   const nameRef = useRef(null);
 
-  const [team, setTeam] = useState('groom');
-  const [guests, setGuests] = useState(2);
-  const [name, setName] = useState('');
+  // Personalised links (?guest=…&team=…&n=…) pre-fill the form.
+  const [team, setTeam] = useState(GUEST.team || 'groom');
+  const [guests, setGuests] = useState(GUEST.count || 2);
+  const [name, setName] = useState(GUEST.name);
   const [note, setNote] = useState('');
   const [touched, setTouched] = useState(false);
   const [selectedEvents, setSelectedEvents] = useState(WEDDING_DATA.events.map((e) => e.id));
@@ -175,7 +177,7 @@ export default function RsvpSection() {
                       soundEngine.playSoftTick();
                       setTeam(item.id);
                     }}
-                    className={`flex flex-col items-center rounded-sm border p-4 transition-all ${
+                    className={`flex flex-col items-center rounded-sm border p-4 transition-[background-color,border-color,color,box-shadow] ${
                       active
                         ? 'border-kansa bg-sindoor text-ivory shadow-md'
                         : 'border-kansa/45 bg-cream/60 text-sindoor hover:border-sindoor'

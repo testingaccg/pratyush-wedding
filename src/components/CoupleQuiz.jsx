@@ -70,7 +70,7 @@ export default function CoupleQuiz() {
             {QUIZ.map((_, i) => (
               <span
                 key={i}
-                className={`h-1.5 rounded-full transition-all duration-500 ${
+                className={`h-1.5 rounded-full transition-[width,background-color] duration-300 ${
                   i < qIdx ? 'w-8 bg-sindoor' : i === qIdx ? 'w-8 bg-kansa' : 'w-4 bg-kansa/30'
                 }`}
               />

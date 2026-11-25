@@ -4,18 +4,56 @@
 
 @layer base {
   html {
+    /* framer-motion useScroll measures offsets relative to <html> */
+    position: relative;
     scroll-behavior: smooth;
     background-color: #FAF7F2;
     color: #24191A;
+    -webkit-tap-highlight-color: transparent;
+    text-rendering: optimizeLegibility;
   }
 
   body {
     font-family: 'Manrope', system-ui, sans-serif;
     overflow-x: hidden;
+    background-color: #FAF7F2;
     background-image:
       radial-gradient(circle at 18% 12%, rgba(197, 155, 56, 0.07) 0%, transparent 42%),
       radial-gradient(circle at 84% 38%, rgba(166, 28, 36, 0.045) 0%, transparent 45%),
       radial-gradient(circle at 50% 85%, rgba(197, 155, 56, 0.06) 0%, transparent 50%);
+  }
+
+  /* Handmade cotton-rag paper grain (feTurbulence) laid over the whole page,
+     including content, like real letterpress stock. Very low alpha; no blend
+     modes so mobile scrolling stays cheap. */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    opacity: 0.38;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.45 0 0 0 0 0.33 0 0 0 0 0.2 0 0 0 0.09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+
+  /* Debossed letterpress feel on serif headings */
+  h2.font-serif,
+  h3.font-serif {
+    text-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.75),
+      0 -1px 0 rgba(120, 17, 23, 0.08);
+  }
+
+  /* Consistent, on-brand keyboard focus */
+  :where(a, button, input, textarea, [tabindex]):focus-visible {
+    outline: 2px solid #C59B38;
+    outline-offset: 3px;
+  }
+
+  ::selection {
+    background: #A61C24;
+    color: #FAF7F2;
   }
 }
 
@@ -35,6 +73,8 @@
   box-shadow:
     inset 0 0 0 5px #FAF7F2,
     inset 0 0 0 6px rgba(166, 28, 36, 0.22),
+    inset 0 1px 0 7px rgba(255, 255, 255, 0.35),
+    0 1px 0 rgba(255, 255, 255, 0.8),
     0 14px 36px -18px rgba(36, 25, 26, 0.14);
 }
 
@@ -49,14 +89,39 @@
 }
 
 .gold-shimmer-border {
-  background: linear-gradient(
-    90deg,
-    rgba(197, 155, 56, 0.35),
-    rgba(230, 202, 126, 0.9),
-    rgba(197, 155, 56, 0.35)
-  );
+  background: linear-gradient(90deg, rgba(197, 155, 56, 0.35), rgba(230, 202, 126, 0.9), rgba(197, 155, 56, 0.35));
   background-size: 200% auto;
   animation: foil-shimmer 6s linear infinite;
+}
+
+/* Gold-foil text: used on the hero names */
+.foil-text {
+  background-image: linear-gradient(
+    100deg,
+    #A61C24 0%,
+    #A61C24 38%,
+    #C9772E 46%,
+    #E6CA7E 50%,
+    #C9772E 54%,
+    #A61C24 62%,
+    #A61C24 100%
+  );
+  background-size: 260% 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: foil-text-sweep 7s cubic-bezier(0.22, 1, 0.36, 1) 1.2s infinite;
+}
+
+@keyframes foil-text-sweep {
+  0% {
+    background-position: 100% 0;
+  }
+  45%,
+  100% {
+    background-position: 0% 0;
+  }
 }
 
 @keyframes slow-spin {
@@ -70,4 +135,24 @@
 
 .animate-slow-spin {
   animation: slow-spin 95s linear infinite;
+}
+
+/* Accessibility: calm everything for guests who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.12s !important;
+  }
+
+  .foil-text {
+    animation: none;
+    background-position: 100% 0;
+  }
 }

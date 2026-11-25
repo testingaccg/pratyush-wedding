@@ -22,6 +22,8 @@ export const WEDDING_DATA = {
   events: [
     {
       id: 'mehendi',
+      startISO: '2027-02-14T13:00:00+05:30',
+      endISO: '2027-02-14T17:30:00+05:30',
       number: '01',
       eyebrow: 'The Henna Bloom',
       title: 'Mehendi',
@@ -38,6 +40,8 @@ export const WEDDING_DATA = {
     },
     {
       id: 'haldi',
+      startISO: '2027-02-15T10:00:00+05:30',
+      endISO: '2027-02-15T13:00:00+05:30',
       number: '02',
       eyebrow: 'The Sunlit Blessings',
       title: 'Haldi',
@@ -54,6 +58,8 @@ export const WEDDING_DATA = {
     },
     {
       id: 'sangeet',
+      startISO: '2027-02-15T19:30:00+05:30',
+      endISO: '2027-02-15T23:30:00+05:30',
       number: '03',
       eyebrow: 'Rhythm & Starlight',
       title: 'Sangeet',
@@ -70,6 +76,8 @@ export const WEDDING_DATA = {
     },
     {
       id: 'wedding',
+      startISO: '2027-02-16T19:00:00+05:30',
+      endISO: '2027-02-17T00:00:00+05:30',
       number: '04',
       eyebrow: 'The Sacred Vows',
       title: 'Baraat & Pheras',
@@ -83,11 +91,11 @@ export const WEDDING_DATA = {
       dressColor: '#A61C24',
       revealType: 'saptapadi',
       mapsUrl: 'https://maps.google.com/?q=Asansol,+West+Bengal',
-      calendarUrl:
-        'https://calendar.google.com/calendar/render?action=TEMPLATE&text=Pratyush+%26+Sayanee+Wedding&dates=20270216T133000Z/20270216T183000Z&details=Baraat+%26+Sacred+Pheras+for+Pratyush+%26+Sayanee+in+Asansol&location=Asansol,+West+Bengal',
     },
     {
       id: 'reception',
+      startISO: '2027-02-17T20:00:00+05:30',
+      endISO: '2027-02-17T23:30:00+05:30',
       number: '05',
       eyebrow: 'The Grand Finale',
       title: 'The Reception',
@@ -157,6 +165,32 @@ export const WEDDING_DATA = {
       variant: 'lakeside-vows',
       story:
         'Your presence in Asansol is the greatest blessing of all. We cannot wait to celebrate with you!',
+    },
+  ],
+  // "How well do you know the wedding?" mini-quiz.
+  // ✏️ Pratyush & Sayanee: swap these for personal trivia (first date, who said
+  // "I love you" first, etc.). `answer` is the index of the correct option.
+  quiz: [
+    {
+      q: 'On which evening do Pratyush & Sayanee take their seven sacred vows?',
+      options: ['14 February', '16 February', '17 February'],
+      answer: 1,
+      yes: 'Spot on! The Shubh Muhurat is 7:00 PM on 16 February.',
+      no: 'So close! The pheras are on Tuesday, 16 February at 7:00 PM.',
+    },
+    {
+      q: 'What should you wear to the Sangeet?',
+      options: ['Emerald & Pistachio', 'Marigold & Ivory', 'Midnight Indigo & Gold'],
+      answer: 2,
+      yes: 'Yes! Bring your starlit shimmer to the dance floor.',
+      no: 'Not quite — the Sangeet calls for Midnight Indigo & Gold.',
+    },
+    {
+      q: 'How many steps do the couple walk together in the Saptapadi?',
+      options: ['Five', 'Seven', 'Nine'],
+      answer: 1,
+      yes: 'Seven steps, seven vows, one forever.',
+      no: 'It’s seven — one vow for every sacred step.',
     },
   ],
   concierge: [

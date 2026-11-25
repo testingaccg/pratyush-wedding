@@ -8,17 +8,26 @@ export default function AmbientCanvas() {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     let animId;
+    const reduceMq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let W = window.innerWidth;
+    let H = window.innerHeight;
 
+    // Crisp on Retina screens: scale the backing store by devicePixelRatio (capped at 2).
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = window.innerWidth;
+      H = window.innerHeight;
+      canvas.width = W * dpr;
+      canvas.height = H * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
     resize();
     window.addEventListener('resize', resize);
 
-    const particles = Array.from({ length: 32 }, (_, i) => ({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
+    const count = window.innerWidth < 640 ? 20 : 32;
+    const particles = Array.from({ length: count }, (_, i) => ({
+      x: Math.random() * W,
+      y: Math.random() * H,
       size: i % 3 === 0 ? 5 + Math.random() * 4.5 : 1.5 + Math.random() * 2.2,
       speedY: 0.25 + Math.random() * 0.42,
       speedX: (Math.random() - 0.5) * 0.32,
@@ -31,12 +40,13 @@ export default function AmbientCanvas() {
     const bursts = [];
 
     const onBurst = () => {
-      for (let i = 0; i < 42; i++) {
+      const n = reduceMq.matches ? 16 : 42;
+      for (let i = 0; i < n; i++) {
         const angle = -Math.PI / 2 + (Math.random() - 0.5) * 1.9;
         const speed = 3 + Math.random() * 6.5;
         bursts.push({
-          x: canvas.width * (0.3 + Math.random() * 0.4),
-          y: canvas.height * 0.55,
+          x: W * (0.3 + Math.random() * 0.4),
+          y: H * 0.55,
           vx: Math.cos(angle) * speed,
           vy: Math.sin(angle) * speed - 2,
           size: 4 + Math.random() * 5,
@@ -51,19 +61,20 @@ export default function AmbientCanvas() {
     window.addEventListener('wedding-petal-burst', onBurst);
 
     const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(0, 0, W, H);
 
-      for (const p of particles) {
+      // Reduced motion: no ambient drift — only user-triggered bursts are drawn.
+      for (const p of reduceMq.matches ? [] : particles) {
         p.y += p.speedY;
         p.x += p.speedX + Math.sin(p.y * 0.012) * 0.22;
         p.rot += p.rotSpeed;
 
-        if (p.y > canvas.height + 20) {
+        if (p.y > H + 20) {
           p.y = -20;
-          p.x = Math.random() * canvas.width;
+          p.x = Math.random() * W;
         }
-        if (p.x > canvas.width + 20) p.x = -20;
-        if (p.x < -20) p.x = canvas.width + 20;
+        if (p.x > W + 20) p.x = -20;
+        if (p.x < -20) p.x = W + 20;
 
         ctx.save();
         ctx.translate(p.x, p.y);

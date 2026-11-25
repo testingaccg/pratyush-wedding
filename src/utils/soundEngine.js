@@ -16,6 +16,39 @@ class WeddingSoundEngine {
     this.audioEl = null;
     this.usingMp3 = false;
     this.beatIndex = 0;
+    this.pausedByVisibility = false;
+
+    if (typeof document !== 'undefined') {
+      // Pause the soundtrack when the tab/app is backgrounded; resume on return.
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden && this.isPlaying) {
+          this.pausedByVisibility = true;
+          this.stopMusic();
+        } else if (!document.hidden && this.pausedByVisibility) {
+          this.pausedByVisibility = false;
+          this.startMusic();
+        }
+      });
+    }
+  }
+
+  /**
+   * Called synchronously from the door-opening tap. Enables SFX, plays the
+   * opening chime, and starts the soundtrack inside the user gesture so that
+   * iOS Safari / Chrome autoplay policies allow playback.
+   */
+  beginCelebration() {
+    this.sfxEnabled = true;
+    this.ensureContext();
+    this.playShubhoDrishti();
+    this.startMusic();
+  }
+
+  setEnabled(on) {
+    this.sfxEnabled = on;
+    this.pausedByVisibility = false;
+    if (on) this.startMusic();
+    else this.stopMusic();
   }
 
   ensureContext() {

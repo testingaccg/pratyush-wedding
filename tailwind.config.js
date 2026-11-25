@@ -18,7 +18,7 @@ export default {
         kansa: {
           DEFAULT: '#C59B38',
           light: '#E6CA7E',
-          muted: '#8F6D22',
+          muted: '#7D5E1B', // AA: 5.6:1 on ivory, 5.1:1 on cream
         },
         indigoNight: '#1B263B',
         ink: '#24191A',

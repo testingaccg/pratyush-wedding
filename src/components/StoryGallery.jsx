@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight, Images } from 'lucide-react';
 import { WEDDING_DATA } from '../data/weddingData';
 import RoyalArtwork from './RoyalArtwork';
 import { soundEngine } from '../utils/soundEngine';
+import { useModal } from '../utils/useModal';
 
 const LUXURY_EASE = [0.22, 1, 0.36, 1];
 
@@ -28,16 +29,23 @@ export default function StoryGallery() {
     setActiveIdx((i) => (i === WEDDING_DATA.gallery.length - 1 ? 0 : i + 1));
   };
 
-  useEffect(() => {
-    if (activeIdx === null) return;
-    const onKey = (e) => {
-      if (e.key === 'Escape') close();
+  // Esc, focus-trap, scroll-lock & focus restore; ←/→ navigate.
+  const dialogRef = useModal(activeIdx !== null, close, {
+    onKey: (e) => {
       if (e.key === 'ArrowLeft') prev();
       if (e.key === 'ArrowRight') next();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [activeIdx]);
+    },
+  });
+
+  // Swipe left/right on touch devices
+  const [touchX, setTouchX] = useState(null);
+  const onTouchStart = (e) => setTouchX(e.touches[0].clientX);
+  const onTouchEnd = (e) => {
+    if (touchX === null) return;
+    const dx = e.changedTouches[0].clientX - touchX;
+    if (Math.abs(dx) > 50) (dx < 0 ? next : prev)();
+    setTouchX(null);
+  };
 
   return (
     <section id="story" className="scroll-mt-20 bg-cream/65 py-20 sm:py-24">
@@ -65,6 +73,7 @@ export default function StoryGallery() {
             <motion.button
               key={item.id}
               onClick={() => openAt(idx)}
+              aria-label={`Open story ${idx + 1}: ${item.title}`}
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-40px' }}
@@ -103,7 +112,7 @@ export default function StoryGallery() {
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.96 }}
             onClick={() => openAt(0)}
-            className="inline-flex items-center gap-2 rounded-full bg-sindoor px-6 py-3 font-sans text-[11px] font-semibold uppercase tracking-[0.2em] text-ivory shadow-md transition-colors hover:bg-sindoor-deep"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-sindoor px-6 py-3 font-sans text-[11px] font-semibold uppercase tracking-[0.2em] text-ivory shadow-md transition-colors hover:bg-sindoor-deep"
           >
             <Images className="h-4 w-4 text-kansa-light" />
             Open Full Story Carousel
@@ -119,9 +128,19 @@ export default function StoryGallery() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
-            className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-indigoNight/90 p-4 backdrop-blur-md"
+            className="fixed inset-0 z-[60] flex flex-col items-center justify-center overflow-y-auto bg-indigoNight/90 p-4 backdrop-blur-md"
             onClick={close}
           >
+            <div
+              ref={dialogRef}
+              role="dialog"
+              aria-modal="true"
+              aria-label={`Our story, chapter ${activeIdx + 1} of ${WEDDING_DATA.gallery.length}: ${WEDDING_DATA.gallery[activeIdx].title}`}
+              tabIndex={-1}
+              onTouchStart={onTouchStart}
+              onTouchEnd={onTouchEnd}
+              className="flex w-full max-w-4xl flex-col items-center focus:outline-none"
+            >
             <motion.div
               initial={{ scale: 0.94, opacity: 0, y: 12 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -132,8 +151,9 @@ export default function StoryGallery() {
             >
               <button
                 onClick={close}
+                data-autofocus
                 aria-label="Close carousel"
-                className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-sindoor text-ivory transition-transform hover:scale-105 hover:bg-sindoor-deep"
+                className="absolute right-2 top-2 z-10 flex h-11 w-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kansa-light focus-visible:ring-offset-2 items-center justify-center rounded-full bg-sindoor text-ivory transition-transform hover:scale-105 hover:bg-sindoor-deep"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -183,14 +203,16 @@ export default function StoryGallery() {
                 <div className="mt-8 flex items-center justify-between border-t border-kansa/25 pt-4">
                   <button
                     onClick={prev}
-                    className="inline-flex items-center gap-1.5 font-sans text-xs font-semibold uppercase tracking-[0.18em] text-sindoor hover:text-kansa-muted"
+                    aria-label="Previous chapter"
+                    className="inline-flex min-h-[44px] items-center gap-1.5 font-sans text-xs font-semibold uppercase tracking-[0.18em] text-sindoor hover:text-kansa-muted"
                   >
                     <ChevronLeft className="h-4 w-4" />
                     Previous
                   </button>
                   <button
                     onClick={next}
-                    className="inline-flex items-center gap-1.5 font-sans text-xs font-semibold uppercase tracking-[0.18em] text-sindoor hover:text-kansa-muted"
+                    aria-label="Next chapter"
+                    className="inline-flex min-h-[44px] items-center gap-1.5 font-sans text-xs font-semibold uppercase tracking-[0.18em] text-sindoor hover:text-kansa-muted"
                   >
                     Next
                     <ChevronRight className="h-4 w-4" />
@@ -209,6 +231,7 @@ export default function StoryGallery() {
                   key={g.id}
                   onClick={() => openAt(i)}
                   aria-label={`View story ${i + 1}: ${g.title}`}
+                  aria-current={i === activeIdx ? 'true' : undefined}
                   className={`relative h-12 w-16 shrink-0 overflow-hidden rounded-sm border-2 transition-all ${
                     i === activeIdx
                       ? 'scale-105 border-kansa-light shadow-lg'
@@ -218,6 +241,7 @@ export default function StoryGallery() {
                   <RoyalArtwork variant={g.variant} />
                 </button>
               ))}
+            </div>
             </div>
           </motion.div>
         )}

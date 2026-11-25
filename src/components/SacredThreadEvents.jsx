@@ -1,8 +1,10 @@
 import { useRef, useState } from 'react';
 import { motion, AnimatePresence, useScroll, useSpring } from 'framer-motion';
-import { MapPin, CalendarPlus, Sparkles, Check, Flame } from 'lucide-react';
+import { MapPin, CalendarPlus, CalendarHeart, Sparkles, Check, Flame } from 'lucide-react';
 import { WEDDING_DATA } from '../data/weddingData';
 import { soundEngine } from '../utils/soundEngine';
+import { googleCalendarUrl, downloadWeddingIcs } from '../utils/calendar';
+import { toast } from '../utils/toast';
 
 const LUXURY_EASE = [0.22, 1, 0.36, 1];
 
@@ -105,6 +107,7 @@ function DholReveal({ onReveal }) {
   const [beats, setBeats] = useState(0);
 
   const strike = () => {
+    if (beats >= 2) return;
     const next = beats + 1;
     setBeats(next);
     soundEngine.playDhakBeat(next >= 2);
@@ -152,6 +155,7 @@ function SaptapadiReveal({ onReveal }) {
   const [step, setStep] = useState(0);
 
   const advance = () => {
+    if (step >= 7) return;
     const next = step + 1;
     soundEngine.playSaatPaakStep(step);
     setStep(next);
@@ -179,7 +183,7 @@ function SaptapadiReveal({ onReveal }) {
 
       <motion.button
         onClick={advance}
-        aria-label="Tap through seven sacred vows"
+        aria-label={`Tap through seven sacred vows — ${step} of 7 taken`}
         whileHover={{ scale: 1.06 }}
         whileTap={{ scale: 0.92 }}
         animate={{ rotate: step * 51.4 }}
@@ -199,7 +203,7 @@ function SaptapadiReveal({ onReveal }) {
           soundEngine.playSaatPaakStep(6);
           onReveal();
         }}
-        className="mt-3 font-sans text-[11px] font-semibold uppercase tracking-[0.2em] text-sindoor underline underline-offset-4 hover:text-kansa-muted"
+        className="mt-2 min-h-[44px] px-2 font-sans text-[11px] font-semibold uppercase tracking-[0.2em] text-sindoor underline underline-offset-4 hover:text-kansa-muted"
       >
         Or unveil the wedding details now
       </button>
@@ -288,16 +292,34 @@ export default function SacredThreadEvents() {
           Four days of colour, music, sacred vows, and unforgettable celebrations.
         </p>
 
-        {revealedIds.length < WEDDING_DATA.events.length && (
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+          {revealedIds.length < WEDDING_DATA.events.length && (
+            <motion.button
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
+              onClick={revealAll}
+              className="min-h-[44px] rounded-full border border-sindoor bg-ivory px-5 font-sans text-[11px] font-semibold uppercase tracking-[0.2em] text-sindoor transition-colors hover:bg-sindoor hover:text-ivory"
+            >
+              Unveil All 5 Events
+            </motion.button>
+          )}
           <motion.button
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.96 }}
-            onClick={revealAll}
-            className="mt-5 rounded-full border border-sindoor bg-ivory px-5 py-2 font-sans text-[11px] font-semibold uppercase tracking-[0.2em] text-sindoor transition-colors hover:bg-sindoor hover:text-ivory"
+            onClick={() => {
+              soundEngine.playPradipLit();
+              downloadWeddingIcs();
+              toast('All 5 celebrations added — open the file to save to your calendar');
+            }}
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-sindoor px-5 font-sans text-[11px] font-semibold uppercase tracking-[0.2em] text-ivory shadow-md transition-colors hover:bg-sindoor-deep"
           >
-            Unveil All 5 Events
+            <CalendarHeart aria-hidden="true" className="h-4 w-4 text-kansa-light" />
+            Add All 5 to Calendar (.ics)
           </motion.button>
-        )}
+        </div>
+        <p aria-live="polite" className="mt-3 font-sans text-[11px] font-semibold uppercase tracking-[0.2em] text-kansa-muted">
+          {revealedIds.length} of {WEDDING_DATA.events.length} rituals unveiled
+        </p>
       </motion.div>
 
       <div ref={timelineRef} className="relative mt-14 space-y-10">
@@ -415,21 +437,23 @@ export default function SacredThreadEvents() {
                           target="_blank"
                           rel="noreferrer"
                           onClick={() => soundEngine.playSoftTick()}
-                          className="inline-flex items-center gap-2 rounded-full bg-sindoor px-4 py-2 font-sans text-[11px] font-semibold uppercase tracking-[0.18em] text-ivory transition-all hover:-translate-y-0.5 hover:bg-sindoor-deep"
+                          aria-label={`Get directions to ${ev.venue} for ${ev.title}`}
+                          className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-sindoor px-4 font-sans text-[11px] font-semibold uppercase tracking-[0.18em] text-ivory transition-all hover:-translate-y-0.5 hover:bg-sindoor-deep"
                         >
-                          <MapPin className="h-3.5 w-3.5 text-kansa-light" />
+                          <MapPin aria-hidden="true" className="h-3.5 w-3.5 text-kansa-light" />
                           Get Directions
                         </a>
 
-                        {ev.calendarUrl && (
+                        {(
                           <a
-                            href={ev.calendarUrl}
+                            href={googleCalendarUrl(ev)}
                             target="_blank"
                             rel="noreferrer"
                             onClick={() => soundEngine.playSoftTick()}
-                            className="inline-flex items-center gap-2 rounded-full border border-kansa bg-cream px-4 py-2 font-sans text-[11px] font-semibold uppercase tracking-[0.18em] text-sindoor transition-all hover:-translate-y-0.5 hover:bg-kansa/20"
+                            aria-label={`Add ${ev.title} to Google Calendar`}
+                            className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-kansa bg-cream px-4 font-sans text-[11px] font-semibold uppercase tracking-[0.18em] text-sindoor transition-all hover:-translate-y-0.5 hover:bg-kansa/20"
                           >
-                            <CalendarPlus className="h-3.5 w-3.5" />
+                            <CalendarPlus aria-hidden="true" className="h-3.5 w-3.5" />
                             Add to Calendar
                           </a>
                         )}

@@ -93,17 +93,20 @@ export default function AttirePalette() {
       </motion.div>
 
       {/* Event Pill Tabs */}
-      <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
+      <div role="tablist" aria-label="Celebration lookbooks" className="mt-8 flex flex-wrap items-center justify-center gap-2">
         {LOOKBOOK.map((item) => {
           const isSelected = item.id === activeId;
           return (
             <button
               key={item.id}
+              role="tab"
+              aria-selected={isSelected}
+              aria-controls="attire-panel"
               onClick={() => {
                 soundEngine.playSoftTick();
                 setActiveId(item.id);
               }}
-              className={`relative rounded-full px-4 py-2 font-sans text-[11px] font-semibold uppercase tracking-[0.18em] transition-colors ${
+              className={`relative min-h-[44px] rounded-full px-4 font-sans text-[11px] font-semibold uppercase tracking-[0.18em] transition-colors ${
                 isSelected ? 'text-ivory' : 'text-sindoor hover:bg-cream'
               }`}
             >
@@ -121,7 +124,7 @@ export default function AttirePalette() {
       </div>
 
       {/* Lookbook Card */}
-      <div className="rajbari-frame mt-8 overflow-hidden bg-ivory p-6 sm:p-10">
+      <div id="attire-panel" role="tabpanel" aria-live="polite" className="rajbari-frame mt-8 overflow-hidden bg-ivory p-6 sm:p-10">
         <AnimatePresence mode="wait">
           <motion.div
             key={active.id}
@@ -169,6 +172,8 @@ export default function AttirePalette() {
                   className="flex flex-col items-center rounded-sm border border-kansa/35 bg-cream/60 p-3 text-center shadow-sm"
                 >
                   <div
+                    role="img"
+                    aria-label={`${swatch.name} swatch ${swatch.hex}`}
                     className="h-16 w-16 rounded-full border-2 border-ivory shadow-inner ring-1 ring-kansa/45 sm:h-20 sm:w-20"
                     style={{
                       background: `radial-gradient(circle at 30% 30%, rgba(255,255,255,0.35), transparent 60%), ${swatch.hex}`,

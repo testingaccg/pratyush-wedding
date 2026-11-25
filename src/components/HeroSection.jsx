@@ -68,9 +68,11 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 18, filter: 'blur(4px)' }}
             animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
             transition={{ duration: 0.9, delay: 0.2, ease: LUXURY_EASE }}
-            className="mt-2.5 font-script text-6xl text-sindoor sm:text-7xl xl:text-8xl"
+            className="mt-2.5 pb-2 font-script text-6xl leading-[1.05] text-sindoor sm:text-7xl xl:text-8xl"
           >
-            {WEDDING_DATA.couple.groom} &amp; {WEDDING_DATA.couple.bride}
+            <span className="foil-text">
+              {WEDDING_DATA.couple.groom} &amp; {WEDDING_DATA.couple.bride}
+            </span>
           </motion.h1>
 
           <motion.p
@@ -88,7 +90,7 @@ export default function HeroSection() {
             transition={{ duration: 0.7, delay: 0.38, ease: LUXURY_EASE }}
             className="mt-3.5 inline-flex items-center gap-2 rounded-full border border-kansa/45 bg-cream px-4 py-1.5 font-sans text-xs font-semibold uppercase tracking-[0.2em] text-sindoor shadow-sm"
           >
-            <Calendar className="h-3.5 w-3.5 text-terracotta" />
+            <Calendar aria-hidden="true" className="h-3.5 w-3.5 text-terracotta" />
             {WEDDING_DATA.couple.dateRange} · {WEDDING_DATA.couple.city}
           </motion.div>
 
@@ -102,7 +104,10 @@ export default function HeroSection() {
           </motion.p>
 
           {/* Live Countdown with Smooth Tick Pop */}
-          <div className="mx-auto mt-6 grid max-w-md grid-cols-4 gap-2.5 lg:mx-0">
+          <p className="sr-only">
+            {countdown.days} days and {countdown.hours} hours until the wedding on {WEDDING_DATA.couple.weddingDateLabel}.
+          </p>
+          <div aria-hidden="true" className="mx-auto mt-6 grid max-w-md grid-cols-4 gap-2.5 lg:mx-0">
             {[
               { label: 'Days', value: countdown.days },
               { label: 'Hours', value: countdown.hours },
@@ -125,7 +130,7 @@ export default function HeroSection() {
                       animate={{ y: 0, opacity: 1 }}
                       exit={{ y: 12, opacity: 0 }}
                       transition={{ duration: 0.28, ease: LUXURY_EASE }}
-                      className="block font-serif text-2xl font-bold text-sindoor sm:text-3xl"
+                      className="block font-serif text-2xl font-bold tabular-nums text-sindoor sm:text-3xl"
                     >
                       {String(item.value).padStart(2, '0')}
                     </motion.span>
@@ -148,15 +153,15 @@ export default function HeroSection() {
             <a
               href="#celebrations"
               onClick={() => soundEngine.playSoftTick()}
-              className="inline-flex items-center gap-2 rounded-full bg-sindoor px-6 py-3 font-sans text-xs font-semibold uppercase tracking-[0.2em] text-ivory shadow-md transition-all hover:-translate-y-0.5 hover:bg-sindoor-deep hover:shadow-lg"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-sindoor px-6 py-3 font-sans text-xs font-semibold uppercase tracking-[0.2em] text-ivory shadow-md transition-all hover:-translate-y-0.5 hover:bg-sindoor-deep hover:shadow-lg"
             >
-              <Sparkles className="h-4 w-4 text-kansa-light" />
+              <Sparkles aria-hidden="true" className="h-4 w-4 text-kansa-light" />
               Explore All 5 Events
             </a>
             <a
               href="#rsvp"
               onClick={() => soundEngine.playSoftTick()}
-              className="inline-flex items-center gap-2 rounded-full border border-sindoor bg-ivory px-6 py-3 font-sans text-xs font-semibold uppercase tracking-[0.2em] text-sindoor transition-all hover:-translate-y-0.5 hover:bg-cream"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-sindoor bg-ivory px-6 py-3 font-sans text-xs font-semibold uppercase tracking-[0.2em] text-sindoor transition-all hover:-translate-y-0.5 hover:bg-cream"
             >
               RSVP Now
             </a>
@@ -165,9 +170,10 @@ export default function HeroSection() {
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.94 }}
               onClick={sendPetalBlessing}
-              className="inline-flex items-center gap-2 rounded-full border border-kansa/70 bg-cream/90 px-4 py-3 font-sans text-[11px] font-semibold uppercase tracking-[0.16em] text-sindoor transition-colors hover:bg-kansa/20"
+              aria-label={`Shower petals for the couple — ${blessings} blessings sent`}
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-kansa/70 bg-cream/90 px-4 py-3 font-sans text-[11px] font-semibold uppercase tracking-[0.16em] text-sindoor transition-colors hover:bg-kansa/20"
             >
-              <Heart className="h-3.5 w-3.5 fill-sindoor text-sindoor" />
+              <Heart aria-hidden="true" className="h-3.5 w-3.5 fill-sindoor text-sindoor" />
               Shower Petals ({blessings})
             </motion.button>
           </motion.div>
@@ -185,6 +191,7 @@ export default function HeroSection() {
           <motion.span
             animate={{ y: [-4, 4, -4], opacity: [0.4, 1, 0.4] }}
             transition={{ duration: 3.4, repeat: Infinity, ease: 'easeInOut' }}
+            aria-hidden="true"
             className="pointer-events-none absolute -left-3 top-10 z-10 text-sm text-kansa"
           >
             ✦
@@ -192,6 +199,7 @@ export default function HeroSection() {
           <motion.span
             animate={{ y: [4, -4, 4], opacity: [0.4, 1, 0.4] }}
             transition={{ duration: 4.1, delay: 0.8, repeat: Infinity, ease: 'easeInOut' }}
+            aria-hidden="true"
             className="pointer-events-none absolute -right-2 top-24 z-10 text-xs text-sindoor"
           >
             ✦
@@ -199,7 +207,7 @@ export default function HeroSection() {
 
           <div className="rajbari-frame overflow-hidden bg-ivory p-3 shadow-2xl">
             <div className="aspect-[4/5] overflow-hidden">
-              <RoyalArtwork variant="palace-courtyard" />
+              <RoyalArtwork variant="palace-courtyard" interactive />
             </div>
           </div>
 

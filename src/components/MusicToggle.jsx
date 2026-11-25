@@ -5,17 +5,14 @@ import { WEDDING_DATA } from '../data/weddingData';
 import { soundEngine } from '../utils/soundEngine';
 
 export default function MusicToggle({ isPlaying, onToggle }) {
+  // `null` = guest hasn't chosen yet (before the doors open) — leave SFX on.
   useEffect(() => {
-    soundEngine.sfxEnabled = isPlaying;
-    if (isPlaying) {
-      soundEngine.startMusic();
-    } else {
-      soundEngine.stopMusic();
-    }
+    if (isPlaying === null) return;
+    soundEngine.setEnabled(isPlaying);
   }, [isPlaying]);
 
   return (
-    <div className="fixed bottom-5 right-5 z-40 flex items-center gap-2.5">
+    <div className="fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-5 z-40 flex items-center gap-2.5">
       <AnimatePresence>
         {isPlaying && (
           <motion.div
@@ -51,10 +48,11 @@ export default function MusicToggle({ isPlaying, onToggle }) {
         whileTap={{ scale: 0.93 }}
         onClick={onToggle}
         aria-label={isPlaying ? 'Mute music and sounds' : 'Play music and sounds'}
-        className="group relative flex h-12 w-12 items-center justify-center rounded-full border border-kansa/70 bg-sindoor text-kansa-light shadow-xl"
+        aria-pressed={!!isPlaying}
+        className="group relative flex h-12 w-12 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kansa focus-visible:ring-offset-2 focus-visible:ring-offset-ivory items-center justify-center rounded-full border border-kansa/70 bg-sindoor text-kansa-light shadow-xl"
       >
         {isPlaying && (
-          <span className="absolute -inset-1 rounded-full border border-kansa/45 animate-ping opacity-40" />
+          <span aria-hidden="true" className="pointer-events-none absolute inset-0 rounded-full border border-kansa/45 animate-ping opacity-40 motion-reduce:hidden" />
         )}
         {isPlaying ? (
           <Volume2 className="h-5 w-5" />

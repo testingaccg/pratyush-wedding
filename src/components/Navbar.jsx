@@ -35,13 +35,14 @@ export default function Navbar() {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -64, opacity: 0 }}
             transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+            aria-label="Sections"
             className="fixed left-0 right-0 top-2.5 z-30 mx-auto max-w-3xl px-3 sm:px-4"
           >
-            <div className="flex items-center justify-between rounded-full border border-kansa/45 bg-ivory/90 px-4 py-2 shadow-lg backdrop-blur-md sm:px-5 sm:py-2.5">
+            <div className="flex items-center justify-between rounded-full border border-kansa/45 bg-ivory/90 px-3 py-0.5 shadow-lg backdrop-blur-md sm:px-5">
               <a
                 href="#"
                 onClick={() => soundEngine.playSoftTick()}
-                className="shrink-0"
+                className="flex min-h-[44px] shrink-0 items-center px-1"
                 aria-label="Back to top"
               >
                 <span className="font-serif text-sm font-bold tracking-widest text-sindoor sm:hidden">
@@ -52,7 +53,7 @@ export default function Navbar() {
                 </span>
               </a>
 
-              <div className="flex items-center gap-3.5 sm:gap-6">
+              <div className="flex items-center gap-0.5 sm:gap-3">
                 {[
                   { label: 'Rituals', href: '#celebrations' },
                   { label: 'Story', href: '#story' },
@@ -63,7 +64,7 @@ export default function Navbar() {
                     key={link.href}
                     href={link.href}
                     onClick={() => soundEngine.playSoftTick()}
-                    className="font-sans text-[10px] font-semibold uppercase tracking-[0.16em] text-ink/80 transition-colors hover:text-sindoor sm:text-[11px] sm:tracking-[0.18em]"
+                    className="flex min-h-[44px] items-center px-2 font-sans text-[10px] font-semibold uppercase tracking-[0.16em] text-ink/80 transition-colors hover:text-sindoor sm:text-[11px] sm:tracking-[0.18em]"
                   >
                     {link.label}
                   </a>

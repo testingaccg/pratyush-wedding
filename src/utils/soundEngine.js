@@ -189,7 +189,9 @@ class WeddingSoundEngine {
     this.sfxEnabled = true;
 
     // 1. Play configured wedding track (e.g. Perfect MP3), falling back cleanly if blocked
-    const trackUrl = WEDDING_DATA?.couple?.musicUrl || '/music.mp3';
+    // Resolve relative paths so the comparison with audio.src (always absolute)
+    // holds — otherwise every unmute rebuilt the player and restarted the song.
+    const trackUrl = new URL(WEDDING_DATA?.couple?.musicUrl || './music.mp3', document.baseURI).href;
     try {
       if (!this.audioEl || this.audioEl.src !== trackUrl) {
         this.audioEl = new Audio(trackUrl);

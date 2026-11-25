@@ -12,8 +12,9 @@ export const WEDDING_DATA = {
     city: 'Asansol',
     ceremonyISO: '2027-02-16T19:00:00+05:30',
     whatsappNumber: '919876543210',
-    musicUrl: 'https://pritam-anushka-25nov-wedding-invitation.vercel.app/perfect.mp3',
-    musicLabel: 'Ed Sheeran · Perfect',
+    // Self-hosted in /public — relative so it works under the GitHub Pages sub-path.
+    musicUrl: './kudmayi.mp3',
+    musicLabel: 'Kudmayi',
   },
   poem: {
     eyebrow: 'Together with their families',

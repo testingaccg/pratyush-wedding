@@ -1,9 +1,9 @@
 export const WEDDING_DATA = {
   couple: {
     groom: 'Pratyush',
-    bride: 'Pratyusha',
-    monogram: 'P · P',
-    hashtag: '#PratyushKiPratyusha',
+    bride: 'Sayanee',
+    monogram: 'P · S',
+    hashtag: '#PratyushWedsSayanee',
     tagline: 'Two souls, one timeless rhythm',
     dateRange: '14 — 17 February 2027',
     weddingDateLabel: '16 February 2027',
@@ -17,7 +17,7 @@ export const WEDDING_DATA = {
     eyebrow: 'Together with their families',
     title: 'Written In Stardust',
     quote:
-      '“Two names that sounded like poetry, two journeys quietly converging—we invite you to Asansol to celebrate the beginning of our forever.”',
+      '“Two lives gently woven into one story—we invite you to Asansol to celebrate the beginning of our forever.”',
   },
   events: [
     {
@@ -84,7 +84,7 @@ export const WEDDING_DATA = {
       revealType: 'saptapadi',
       mapsUrl: 'https://maps.google.com/?q=Asansol,+West+Bengal',
       calendarUrl:
-        'https://calendar.google.com/calendar/render?action=TEMPLATE&text=Pratyush+%26+Pratyusha+Wedding&dates=20270216T133000Z/20270216T183000Z&details=Baraat+%26+Sacred+Pheras+for+Pratyush+%26+Pratyusha+in+Asansol&location=Asansol,+West+Bengal',
+        'https://calendar.google.com/calendar/render?action=TEMPLATE&text=Pratyush+%26+Sayanee+Wedding&dates=20270216T133000Z/20270216T183000Z&details=Baraat+%26+Sacred+Pheras+for+Pratyush+%26+Sayanee+in+Asansol&location=Asansol,+West+Bengal',
     },
     {
       id: 'reception',
@@ -152,7 +152,7 @@ export const WEDDING_DATA = {
     {
       id: '06',
       location: 'Forever Ahead',
-      title: 'Pratyush & Pratyusha',
+      title: 'Pratyush & Sayanee',
       subtitle: '16 February 2027 · Asansol',
       variant: 'lakeside-vows',
       story:
@@ -162,7 +162,7 @@ export const WEDDING_DATA = {
   concierge: [
     {
       label: 'Wedding Hashtag',
-      value: '#PratyushKiPratyusha',
+      value: '#PratyushWedsSayanee',
       detail: 'Share your favourite candid moments & memories with our wedding hashtag.',
     },
     {

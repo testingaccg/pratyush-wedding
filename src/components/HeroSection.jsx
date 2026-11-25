@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { Calendar, Sparkles, Heart } from 'lucide-react';
 import { WEDDING_DATA } from '../data/weddingData';
 import RoyalArtwork from './RoyalArtwork';
@@ -34,7 +34,7 @@ export default function HeroSection() {
     target: heroRef,
     offset: ['start start', 'end start'],
   });
-  const archY = useTransform(scrollYProgress, [0, 1], [0, 44]);
+  const archY = useTransform(scrollYProgress, [0, 1], [0, 42]);
   const badgeY = useTransform(scrollYProgress, [0, 1], [0, -24]);
 
   const sendPetalBlessing = () => {
@@ -45,15 +45,15 @@ export default function HeroSection() {
 
   return (
     <header ref={heroRef} className="relative overflow-hidden">
-      <div className="mx-auto grid max-w-6xl items-center gap-8 px-4 py-8 sm:py-12 lg:grid-cols-12 lg:gap-10 lg:py-14">
+      <div className="mx-auto grid max-w-6xl items-center gap-8 px-4 py-7 sm:py-10 lg:grid-cols-12 lg:gap-10 lg:py-11">
         {/* Left Editorial Column */}
         <motion.div
-          initial={{ opacity: 0, y: 26 }}
+          initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, ease: LUXURY_EASE }}
           className="text-center lg:col-span-7 lg:text-left"
         >
-          <CoutureCrest className="mx-auto mb-3 h-16 w-40 lg:mx-0" />
+          <CoutureCrest className="mx-auto mb-2.5 h-14 w-36 lg:mx-0" />
 
           <motion.p
             initial={{ opacity: 0, y: 12 }}
@@ -65,10 +65,10 @@ export default function HeroSection() {
           </motion.p>
 
           <motion.h1
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.85, delay: 0.2, ease: LUXURY_EASE }}
-            className="mt-3 font-script text-6xl text-sindoor sm:text-7xl xl:text-8xl"
+            initial={{ opacity: 0, y: 18, filter: 'blur(4px)' }}
+            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            transition={{ duration: 0.9, delay: 0.2, ease: LUXURY_EASE }}
+            className="mt-2.5 font-script text-6xl text-sindoor sm:text-7xl xl:text-8xl"
           >
             {WEDDING_DATA.couple.groom} &amp; {WEDDING_DATA.couple.bride}
           </motion.h1>
@@ -77,7 +77,7 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3, ease: LUXURY_EASE }}
-            className="mt-2 font-serif text-2xl italic text-ink/80 sm:text-3xl"
+            className="mt-1.5 font-serif text-2xl italic text-ink/80 sm:text-3xl"
           >
             {WEDDING_DATA.poem.title}
           </motion.p>
@@ -86,23 +86,23 @@ export default function HeroSection() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.7, delay: 0.38, ease: LUXURY_EASE }}
-            className="mt-4 inline-flex items-center gap-2 rounded-full border border-kansa/45 bg-cream px-4 py-1.5 font-sans text-xs font-semibold uppercase tracking-[0.2em] text-sindoor shadow-sm"
+            className="mt-3.5 inline-flex items-center gap-2 rounded-full border border-kansa/45 bg-cream px-4 py-1.5 font-sans text-xs font-semibold uppercase tracking-[0.2em] text-sindoor shadow-sm"
           >
             <Calendar className="h-3.5 w-3.5 text-terracotta" />
             {WEDDING_DATA.couple.dateRange} · {WEDDING_DATA.couple.city}
           </motion.div>
 
           <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.9, delay: 0.48 }}
-            className="mx-auto mt-6 max-w-xl font-serif text-xl italic leading-relaxed text-ink/85 lg:mx-0"
+            initial={{ opacity: 0, filter: 'blur(5px)' }}
+            animate={{ opacity: 1, filter: 'blur(0px)' }}
+            transition={{ duration: 1.0, delay: 0.48, ease: LUXURY_EASE }}
+            className="mx-auto mt-5 max-w-xl font-serif text-lg italic leading-relaxed text-ink/85 sm:text-xl lg:mx-0"
           >
             {WEDDING_DATA.poem.quote}
           </motion.p>
 
-          {/* Live Countdown */}
-          <div className="mx-auto mt-8 grid max-w-md grid-cols-4 gap-2.5 lg:mx-0">
+          {/* Live Countdown with Smooth Tick Pop */}
+          <div className="mx-auto mt-6 grid max-w-md grid-cols-4 gap-2.5 lg:mx-0">
             {[
               { label: 'Days', value: countdown.days },
               { label: 'Hours', value: countdown.hours },
@@ -115,10 +115,21 @@ export default function HeroSection() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.5 + idx * 0.07, ease: LUXURY_EASE }}
                 whileHover={{ y: -3 }}
-                className="alpona-frame bg-ivory px-2 py-3 text-center transition-shadow hover:shadow-md"
+                className="alpona-frame overflow-hidden bg-ivory px-2 py-2.5 text-center transition-shadow hover:shadow-md"
               >
-                <div className="font-serif text-2xl font-bold text-sindoor sm:text-3xl">
-                  {String(item.value).padStart(2, '0')}
+                <div className="relative h-8 overflow-hidden sm:h-9">
+                  <AnimatePresence mode="popLayout" initial={false}>
+                    <motion.span
+                      key={item.value}
+                      initial={{ y: -12, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      exit={{ y: 12, opacity: 0 }}
+                      transition={{ duration: 0.28, ease: LUXURY_EASE }}
+                      className="block font-serif text-2xl font-bold text-sindoor sm:text-3xl"
+                    >
+                      {String(item.value).padStart(2, '0')}
+                    </motion.span>
+                  </AnimatePresence>
                 </div>
                 <div className="font-sans text-[10px] font-semibold uppercase tracking-[0.18em] text-kansa-muted">
                   {item.label}
@@ -132,7 +143,7 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.75, ease: LUXURY_EASE }}
-            className="mt-8 flex flex-wrap items-center justify-center gap-3 lg:justify-start"
+            className="mt-7 flex flex-wrap items-center justify-center gap-3 lg:justify-start"
           >
             <a
               href="#celebrations"
@@ -151,6 +162,7 @@ export default function HeroSection() {
             </a>
             <motion.button
               type="button"
+              whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.94 }}
               onClick={sendPetalBlessing}
               className="inline-flex items-center gap-2 rounded-full border border-kansa/70 bg-cream/90 px-4 py-3 font-sans text-[11px] font-semibold uppercase tracking-[0.16em] text-sindoor transition-colors hover:bg-kansa/20"
@@ -161,14 +173,30 @@ export default function HeroSection() {
           </motion.div>
         </motion.div>
 
-        {/* Right Heritage Arch Showcase with Scroll Parallax */}
+        {/* Right Heritage Arch Showcase with Scroll Parallax & Floating Sparkles */}
         <motion.div
           style={{ y: archY }}
           initial={{ opacity: 0, scale: 0.94 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.95, delay: 0.2, ease: LUXURY_EASE }}
-          className="relative mx-auto w-full max-w-sm lg:col-span-5 lg:max-w-[390px]"
+          className="relative mx-auto w-full max-w-sm lg:col-span-5 lg:max-w-[375px]"
         >
+          {/* Delicate Orbiting Gold Sparkles */}
+          <motion.span
+            animate={{ y: [-4, 4, -4], opacity: [0.4, 1, 0.4] }}
+            transition={{ duration: 3.4, repeat: Infinity, ease: 'easeInOut' }}
+            className="pointer-events-none absolute -left-3 top-10 z-10 text-sm text-kansa"
+          >
+            ✦
+          </motion.span>
+          <motion.span
+            animate={{ y: [4, -4, 4], opacity: [0.4, 1, 0.4] }}
+            transition={{ duration: 4.1, delay: 0.8, repeat: Infinity, ease: 'easeInOut' }}
+            className="pointer-events-none absolute -right-2 top-24 z-10 text-xs text-sindoor"
+          >
+            ✦
+          </motion.span>
+
           <div className="rajbari-frame overflow-hidden bg-ivory p-3 shadow-2xl">
             <div className="aspect-[4/5] overflow-hidden">
               <RoyalArtwork variant="palace-courtyard" />

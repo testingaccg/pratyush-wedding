@@ -7,6 +7,7 @@ import MusicToggle from './components/MusicToggle';
 import HeroSection from './components/HeroSection';
 import SacredThreadEvents from './components/SacredThreadEvents';
 import AttirePalette from './components/AttirePalette';
+import FiligreeDivider from './components/FiligreeDivider';
 import StoryGallery from './components/StoryGallery';
 import GuestConcierge from './components/GuestConcierge';
 import RsvpSection from './components/RsvpSection';
@@ -43,9 +44,11 @@ export default function App() {
       >
         <HeroSection />
         <SacredThreadEvents />
+        <FiligreeDivider />
         <AttirePalette />
         <StoryGallery />
         <GuestConcierge />
+        <FiligreeDivider />
         <RsvpSection />
       </motion.main>
 

@@ -70,8 +70,13 @@ export default function StoryGallery() {
               viewport={{ once: true, margin: '-40px' }}
               transition={{ duration: 0.6, delay: idx * 0.06, ease: LUXURY_EASE }}
               whileHover={{ y: -5 }}
-              className="group overflow-hidden rounded-sm border border-kansa/45 bg-ivory p-3 text-left shadow-sm transition-shadow hover:shadow-xl"
+              className="group relative overflow-hidden rounded-sm border border-kansa/45 bg-ivory p-3 text-left shadow-sm transition-shadow hover:shadow-xl"
             >
+              {/* Gold Foil Sheen Sweep */}
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-kansa-light/25 to-transparent transition-transform duration-1000 group-hover:translate-x-full"
+              />
               <div className="relative aspect-[4/3] overflow-hidden bg-indigoNight">
                 <RoyalArtwork
                   variant={item.variant}

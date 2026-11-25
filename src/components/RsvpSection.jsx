@@ -248,6 +248,14 @@ export default function RsvpSection() {
               onClick={(e) => e.stopPropagation()}
               className="alpona-frame relative w-full max-w-md overflow-hidden bg-sindoor p-8 text-center text-ivory shadow-2xl"
             >
+              {/* Foil Shimmer Sweep */}
+              <motion.span
+                aria-hidden="true"
+                initial={{ x: '-120%' }}
+                animate={{ x: '220%' }}
+                transition={{ duration: 2.2, delay: 0.25, ease: 'easeInOut' }}
+                className="pointer-events-none absolute inset-y-0 left-0 w-1/2 skew-x-[-20deg] bg-gradient-to-r from-transparent via-kansa-light/20 to-transparent"
+              />
               <button
                 onClick={() => setShowPass(false)}
                 aria-label="Close pass"

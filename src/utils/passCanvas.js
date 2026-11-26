@@ -17,6 +17,7 @@ const C = {
 const SCRIPT = '"Great Vibes", cursive';
 const SERIF = '"Cormorant Garamond", Georgia, serif';
 const SANS = 'Manrope, system-ui, sans-serif';
+const BENGALI = '"Noto Serif Bengali", serif';
 
 async function ensureFonts() {
   if (!document.fonts?.load) return;
@@ -25,6 +26,7 @@ async function ensureFonts() {
     document.fonts.load(`600 72px ${SERIF}`),
     document.fonts.load(`italic 400 44px ${SERIF}`),
     document.fonts.load(`600 30px ${SANS}`),
+    document.fonts.load(`600 34px ${BENGALI}`),
   ]).catch(() => {});
 }
 
@@ -160,7 +162,7 @@ function dashedRule(ctx, y, x1 = 150, x2 = W - 150) {
   ctx.restore();
 }
 
-export async function renderPassBlob({ name, teamLabel, guests, events }) {
+export async function renderPassBlob({ name = 'Our Honoured Guest' } = {}) {
   await ensureFonts();
   const canvas = document.createElement('canvas');
   canvas.width = W;
@@ -234,52 +236,46 @@ export async function renderPassBlob({ name, teamLabel, guests, events }) {
   dashedRule(ctx, 880);
 
   ctx.font = `600 26px ${SANS}`;
-  spaced(ctx, 'HONOURED GUEST(S)', W / 2, 950, 8);
+  spaced(ctx, 'WITH WARMEST INVITATION TO', W / 2, 950, 8);
 
-  const fitted = fitLines(ctx, name, W - 300, (s) => `600 ${s}px ${SERIF}`, 80, 52, 2);
+  const guestName = (name || '').trim() || 'Our Honoured Guest';
+  const fitted = fitLines(ctx, guestName, W - 300, (s) => `600 ${s}px ${SERIF}`, 84, 52, 2);
   ctx.fillStyle = C.ivory;
   ctx.font = `600 ${fitted.size}px ${SERIF}`;
-  let y = 1035;
+  let y = 1040;
   fitted.lines.forEach((line) => {
     ctx.fillText(line, W / 2, y);
     y += fitted.size * 1.08;
   });
 
   ctx.fillStyle = C.goldLight;
-  ctx.font = `600 28px ${SANS}`;
-  spaced(ctx, `${teamLabel} · ${guests} ${guests === 1 ? 'GUEST' : 'GUESTS'}`.toUpperCase(), W / 2, y + 26, 5);
+  ctx.font = `600 32px ${BENGALI}`;
+  ctx.fillText('॥ শুভ বিবাহ ॥', W / 2, y + 32);
 
-  dashedRule(ctx, y + 82);
+  dashedRule(ctx, y + 86);
 
-  // Selected celebrations
-  const list = events.length ? events : WEDDING_DATA.events;
-  const startY = y + 165;
-  const footerTop = H - 230;
-  const rowH = Math.min(96, (footerTop - startY) / Math.max(1, list.length - 1 + 0.6));
-  const titleSize = Math.round(Math.min(46, rowH * 0.62));
-  list.forEach((ev, i) => {
-    const ry = startY + i * rowH;
-    ctx.textAlign = 'left';
-    ctx.fillStyle = C.goldLight;
-    ctx.font = `600 26px ${SANS}`;
-    ctx.fillText(ev.number, 190, ry);
-    ctx.fillStyle = C.ivory;
-    ctx.font = `600 ${titleSize}px ${SERIF}`;
-    ctx.fillText(ev.title, 250, ry + 2);
-    ctx.textAlign = 'right';
-    ctx.fillStyle = 'rgba(250,247,242,0.85)';
-    ctx.font = `italic 400 ${Math.round(titleSize * 0.74)}px ${SERIF}`;
-    ctx.fillText(ev.date.replace(/^\w+, /, '').replace(' 2027', ''), W - 190, ry + 2);
-    if (i < list.length - 1) {
-      ctx.strokeStyle = 'rgba(230, 202, 126, 0.18)';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(190, ry + rowH * 0.42);
-      ctx.lineTo(W - 190, ry + rowH * 0.42);
-      ctx.stroke();
-    }
-  });
-  ctx.textAlign = 'center';
+  // Single ceremony showcase
+  const ev = WEDDING_DATA.events[0];
+  const cy = y + 178;
+  ctx.fillStyle = C.goldLight;
+  ctx.font = `600 26px ${SANS}`;
+  spaced(ctx, 'SHUBHO BIYE · THE SACRED VOWS', W / 2, cy, 6);
+
+  ctx.fillStyle = C.ivory;
+  ctx.font = `600 54px ${SERIF}`;
+  ctx.fillText(ev.date, W / 2, cy + 78);
+
+  ctx.fillStyle = 'rgba(250,247,242,0.9)';
+  ctx.font = `italic 400 40px ${SERIF}`;
+  ctx.fillText(ev.time, W / 2, cy + 136);
+
+  ctx.fillStyle = C.goldLight;
+  ctx.font = `600 30px ${SANS}`;
+  spaced(ctx, `${ev.venue} · ${ev.city}`.toUpperCase(), W / 2, cy + 206, 4);
+
+  ctx.fillStyle = 'rgba(250,247,242,0.85)';
+  ctx.font = `italic 400 34px ${SERIF}`;
+  ctx.fillText(`Attire: ${ev.dressCode}`, W / 2, cy + 266);
 
   // Footer
   ctx.fillStyle = C.goldLight;

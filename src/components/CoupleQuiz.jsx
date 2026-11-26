@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { RotateCcw, Sparkles } from 'lucide-react';
 import { WEDDING_DATA } from '../data/weddingData';
 import { soundEngine } from '../utils/soundEngine';
+import { useLang } from '../context/LangContext';
 
 const LUXURY_EASE = [0.22, 1, 0.36, 1];
 const QUIZ = WEDDING_DATA.quiz;
@@ -15,6 +16,7 @@ const VERDICTS = [
 ];
 
 export default function CoupleQuiz() {
+  const { lang } = useLang();
   const [qIdx, setQIdx] = useState(0);
   const [picked, setPicked] = useState(null);
   const [score, setScore] = useState(0);
@@ -56,11 +58,15 @@ export default function CoupleQuiz() {
           transition={{ duration: 0.7, ease: LUXURY_EASE }}
           className="text-center"
         >
-          <p className="font-sans text-[11px] font-semibold uppercase tracking-[0.28em] text-kansa-muted">
-            A Little Game While You Wait
+          <p className={lang === 'bn' ? 'font-bengali text-sm font-semibold text-sindoor' : 'font-sans text-[11px] font-semibold uppercase tracking-[0.28em] text-kansa-muted'}>
+            {lang === 'bn' ? 'একটি ছোট্ট খেলা' : 'A Little Game While You Wait'}
           </p>
           <h2 className="mt-2 font-serif text-4xl font-semibold text-sindoor sm:text-5xl">
-            How Well Do You Know <span className="font-script font-normal">P &amp; S</span>?
+            {lang === 'bn' ? (
+              <span lang="bn" className="font-bengali">প্রত্যূষ ও সায়নীকে কতটা চেনেন?</span>
+            ) : (
+              <>How Well Do You Know <span className="font-script font-normal">P &amp; S</span>?</>
+            )}
           </h2>
         </motion.div>
 
@@ -153,11 +159,11 @@ export default function CoupleQuiz() {
                   <p className="mx-auto mt-2 max-w-sm font-serif text-lg italic text-ink/80">{VERDICTS[finalScore].line}</p>
                   <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
                     <a
-                      href="#rsvp"
+                      href="#celebrations"
                       onClick={() => soundEngine.playSoftTick()}
                       className="inline-flex min-h-[44px] items-center rounded-full bg-sindoor px-6 font-sans text-[11px] font-semibold uppercase tracking-[0.2em] text-ivory shadow-md transition-colors hover:bg-sindoor-deep"
                     >
-                      Now RSVP
+                      View Ceremony
                     </a>
                     <button
                       type="button"

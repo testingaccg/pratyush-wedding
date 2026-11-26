@@ -62,7 +62,7 @@ export function buildWeddingIcs(events = WEDDING_DATA.events) {
     'PRODID:-//PratyushWedsSayanee//Wedding Invitation//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
-    `X-WR-CALNAME:${escapeIcs(`${groom} & ${bride} · Wedding Weekend`)}`,
+    `X-WR-CALNAME:${escapeIcs(`${groom} & ${bride} · Shubho Biye`)}`,
     'X-WR-TIMEZONE:Asia/Kolkata',
   ];
   events.forEach((ev) => {
@@ -93,7 +93,7 @@ export function downloadWeddingIcs() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'Pratyush-Sayanee-Wedding-Weekend.ics';
+  a.download = 'Pratyush-Sayanee-Shubho-Biye.ics';
   document.body.appendChild(a);
   a.click();
   a.remove();

@@ -94,7 +94,7 @@ export default function PetalButton() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: reduced ? 0 : -6 }}
             transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
-            className="pointer-events-none rounded-full border border-kansa/55 bg-ivory/95 px-3.5 py-2 font-sans text-[10px] font-semibold uppercase tracking-[0.18em] text-sindoor shadow-lg backdrop-blur-md"
+            className="pointer-events-none max-w-[calc(100vw-7.5rem)] truncate rounded-full border border-kansa/55 bg-ivory/95 px-3.5 py-2 font-sans text-[10px] font-semibold uppercase tracking-[0.18em] text-sindoor shadow-lg backdrop-blur-md"
           >
             শুভ আশীর্বাদ · Shower Shiuli &amp; Petals
           </motion.span>

@@ -9,31 +9,26 @@ import { copyText, toast } from '../utils/toast';
  * one at a time, or in bulk from a pasted guest list.
  */
 const inviteMessage = (name, link) =>
-  `Dearest ${name},\n\nWith joy in our hearts, we invite you to celebrate our wedding — ${WEDDING_DATA.couple.dateRange}, ${WEDDING_DATA.couple.city}.\n\nOpen your invitation: ${link}\n\n— ${WEDDING_DATA.couple.groom} & ${WEDDING_DATA.couple.bride}`;
+  `Dearest ${name},\n\nWith joy in our hearts, we invite you to celebrate our Shubho Biye — ${WEDDING_DATA.couple.dateRange}, ${WEDDING_DATA.couple.city}.\n\nOpen your invitation: ${link}\n\n— ${WEDDING_DATA.couple.groom} & ${WEDDING_DATA.couple.bride}`;
 
 export default function HostLinkMaker() {
   const uid = useId();
   const [name, setName] = useState('');
-  const [team, setTeam] = useState('');
-  const [count, setCount] = useState('');
   const [bulk, setBulk] = useState('');
 
-  const link = buildGuestLink({ name, team: team || null, count: count ? Number(count) : null });
+  const link = buildGuestLink({ name });
 
-  // Bulk lines: "Name" or "Name, bride, 4"
   const bulkLinks = useMemo(
     () =>
       bulk
         .split('\n')
-        .map((l) => l.trim())
+        .map((l) => l.split(',')[0].trim())
         .filter(Boolean)
         .slice(0, 500)
-        .map((line) => {
-          const [n, t, c] = line.split(',').map((x) => x.trim());
-          const tm = /^(bride|groom)$/i.test(t || '') ? t.toLowerCase() : null;
-          const ct = parseInt(c, 10);
-          return { name: n, link: buildGuestLink({ name: n, team: tm, count: ct > 0 ? Math.min(ct, 10) : null }) };
-        }),
+        .map((guestName) => ({
+          name: guestName,
+          link: buildGuestLink({ name: guestName }),
+        })),
     [bulk]
   );
 
@@ -55,26 +50,19 @@ export default function HostLinkMaker() {
           Personal Invite Links
         </h2>
         <p className="mt-1 font-serif text-base italic text-ink/75">
-          Each link opens the doors to “Dearest &lt;name&gt;” and pre-fills their RSVP.
+          Each link opens the doors to a personalised “Dearest &lt;name&gt;” welcome &amp; keepsake pass.
         </p>
 
-        <div className="mt-6 grid gap-3 sm:grid-cols-6">
-          <div className="sm:col-span-3">
-            <label htmlFor={`${uid}-n`} className={label}>Guest name(s)</label>
-            <input id={`${uid}-n`} value={name} maxLength={60} onChange={(e) => setName(e.target.value)} placeholder="Mehra Family" className={input} />
-          </div>
-          <div className="sm:col-span-2">
-            <label htmlFor={`${uid}-t`} className={label}>Side</label>
-            <select id={`${uid}-t`} value={team} onChange={(e) => setTeam(e.target.value)} className={input}>
-              <option value="">Not set</option>
-              <option value="groom">Team Groom</option>
-              <option value="bride">Team Bride</option>
-            </select>
-          </div>
-          <div className="sm:col-span-1">
-            <label htmlFor={`${uid}-c`} className={label}>Guests</label>
-            <input id={`${uid}-c`} type="number" min="1" max="10" value={count} onChange={(e) => setCount(e.target.value)} className={input} />
-          </div>
+        <div className="mt-6">
+          <label htmlFor={`${uid}-n`} className={label}>Guest name(s)</label>
+          <input
+            id={`${uid}-n`}
+            value={name}
+            maxLength={60}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Mehra Family"
+            className={input}
+          />
         </div>
 
         <div className="mt-4 flex items-center gap-2 rounded-sm border border-dashed border-kansa/60 bg-cream/60 px-3 py-2.5">
@@ -101,14 +89,14 @@ export default function HostLinkMaker() {
 
         <div className="mt-8 border-t border-kansa/25 pt-6">
           <label htmlFor={`${uid}-b`} className={label}>
-            Bulk — one guest per line · optional “, bride|groom, count”
+            Bulk — one guest or family name per line
           </label>
           <textarea
             id={`${uid}-b`}
             rows={4}
             value={bulk}
             onChange={(e) => setBulk(e.target.value)}
-            placeholder={'Mehra Family, groom, 4\nAnanya & Rohit, bride, 2\nDadu'}
+            placeholder={'Mehra Family\nAnanya & Rohit\nDadu'}
             className={input}
           />
           {bulkLinks.length > 0 && (

@@ -16,6 +16,8 @@ class WeddingSoundEngine {
     this.loopTimer = null;
     this.audioEl = null;
     this.shankhaEl = null;
+    this.shankhaFadeTimer = null;
+    this.shankhaFadeInterval = null;
     this.usingMp3 = false;
     this.beatIndex = 0;
     this.pausedByVisibility = false;
@@ -256,6 +258,7 @@ class WeddingSoundEngine {
 
   stopMusic() {
     this.isPlaying = false;
+    this.clearShankhaTimers();
     if (this.audioEl) {
       this.audioEl.pause();
       this.audioEl.volume = 0.04;
@@ -351,14 +354,30 @@ class WeddingSoundEngine {
     });
   }
 
+  clearShankhaTimers() {
+    if (this.shankhaFadeTimer) {
+      clearTimeout(this.shankhaFadeTimer);
+      this.shankhaFadeTimer = null;
+    }
+    if (this.shankhaFadeInterval) {
+      clearInterval(this.shankhaFadeInterval);
+      this.shankhaFadeInterval = null;
+    }
+  }
+
   /* Shankha (conch) — plays the authentic self-hosted `./shankha.mp3`
-     recording while softly ducking the background song, falling back to
-     a warm synthesized conch call if offline or blocked. */
+     recording (~6.2s body + ~1.4s smooth fade-out ≈ 7.6s) while softly
+     ducking the background song, falling back to a warm synth if blocked. */
   async playShankha() {
     if (!this.sfxEnabled || typeof window === 'undefined') return;
 
     const restoreMusicVolume = () => {
       if (this.audioEl) this.audioEl.volume = 0.04;
+    };
+
+    const onEndedOrStopped = () => {
+      this.clearShankhaTimers();
+      restoreMusicVolume();
     };
 
     const shankhaUrl = new URL(
@@ -367,12 +386,13 @@ class WeddingSoundEngine {
     ).href;
 
     try {
+      this.clearShankhaTimers();
       if (!this.shankhaEl || this.shankhaEl.src !== shankhaUrl) {
         this.shankhaEl = new Audio(shankhaUrl);
         this.shankhaEl.preload = 'auto';
-        this.shankhaEl.addEventListener('ended', restoreMusicVolume);
-        this.shankhaEl.addEventListener('pause', restoreMusicVolume);
-        this.shankhaEl.addEventListener('error', restoreMusicVolume);
+        this.shankhaEl.addEventListener('ended', onEndedOrStopped);
+        this.shankhaEl.addEventListener('pause', onEndedOrStopped);
+        this.shankhaEl.addEventListener('error', onEndedOrStopped);
       }
       this.shankhaEl.currentTime = 0;
       this.shankhaEl.volume = 0.65;
@@ -380,9 +400,34 @@ class WeddingSoundEngine {
         this.audioEl.volume = 0.012;
       }
       await this.shankhaEl.play();
+
+      // Hold clean conch call for 6.2s, then cross-fade out over 1.4s (~7.6s total)
+      const holdMs = 6200;
+      const fadeMs = 1400;
+      this.shankhaFadeTimer = setTimeout(() => {
+        this.shankhaFadeTimer = null;
+        const startTime = Date.now();
+        this.shankhaFadeInterval = setInterval(() => {
+          if (!this.shankhaEl || this.shankhaEl.paused) {
+            onEndedOrStopped();
+            return;
+          }
+          const progress = Math.min(1, (Date.now() - startTime) / fadeMs);
+          this.shankhaEl.volume = Math.max(0, 0.65 * (1 - progress));
+          if (this.audioEl && this.isPlaying) {
+            this.audioEl.volume = 0.012 + (0.04 - 0.012) * progress;
+          }
+          if (progress >= 1) {
+            this.clearShankhaTimers();
+            this.shankhaEl.pause();
+            this.shankhaEl.currentTime = 0;
+            restoreMusicVolume();
+          }
+        }, 40);
+      }, holdMs);
       return;
     } catch {
-      restoreMusicVolume();
+      onEndedOrStopped();
     }
 
     this.playShankhaSynth();

@@ -366,7 +366,7 @@ class WeddingSoundEngine {
   }
 
   /* Shankha (conch) — plays the authentic self-hosted `./shankha.mp3`
-     recording (~6.2s body + ~1.4s smooth fade-out ≈ 7.6s) while softly
+     recording (4.2s body + 1.3s smooth fade-out = 5.5s total) while softly
      ducking the background song, falling back to a warm synth if blocked. */
   async playShankha() {
     if (!this.sfxEnabled || typeof window === 'undefined') return;
@@ -401,9 +401,9 @@ class WeddingSoundEngine {
       }
       await this.shankhaEl.play();
 
-      // Hold clean conch call for 6.2s, then cross-fade out over 1.4s (~7.6s total)
-      const holdMs = 6200;
-      const fadeMs = 1400;
+      // Hold clean conch call for 4.2s, then cross-fade out over 1.3s (5.5s total)
+      const holdMs = 4200;
+      const fadeMs = 1300;
       this.shankhaFadeTimer = setTimeout(() => {
         this.shankhaFadeTimer = null;
         const startTime = Date.now();

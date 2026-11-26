@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import { Calendar, Sparkles, MapPin } from 'lucide-react';
+import { Calendar, MapPin } from 'lucide-react';
 import { WEDDING_DATA } from '../data/weddingData';
 import RoyalArtwork from './RoyalArtwork';
-import CoutureCrest from './CoutureCrest';
+import { AlponaMandala, ToporMukutEmblem, ShankhaIcon } from './BengaliMotifs';
 import { soundEngine } from '../utils/soundEngine';
 import { GUEST } from '../utils/guest';
 import { getSchedule, now } from '../utils/schedule';
+import { useLang } from '../context/LangContext';
 
 /** Ticks every second; re-targets automatically through the wedding week. */
 function useLiveCountdown() {
@@ -61,6 +62,7 @@ function LiveBanner({ event }) {
 const LUXURY_EASE = [0.22, 1, 0.36, 1];
 
 export default function HeroSection() {
+  const { lang } = useLang();
   const countdown = useLiveCountdown();
   const { schedule } = countdown;
   const heroRef = useRef(null);
@@ -73,7 +75,19 @@ export default function HeroSection() {
 
   return (
     <header ref={heroRef} className="relative overflow-hidden">
-      <div className="mx-auto grid max-w-6xl items-center gap-8 px-4 py-7 sm:py-10 lg:grid-cols-12 lg:gap-10 lg:py-11">
+      {/* Rotating Bengali Alpona Mandalas in the background */}
+      <AlponaMandala
+        className="absolute -left-24 -top-20 hidden h-72 w-72 lg:block"
+        opacity={0.14}
+        duration={95}
+      />
+      <AlponaMandala
+        className="absolute -right-24 bottom-4 hidden h-64 w-64 sm:block sm:h-80 sm:w-80"
+        opacity={0.16}
+        duration={110}
+      />
+
+      <div className="relative mx-auto grid max-w-6xl items-center gap-8 px-4 py-7 sm:py-10 lg:grid-cols-12 lg:gap-10 lg:py-11">
         {/* Left Editorial Column */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -83,16 +97,23 @@ export default function HeroSection() {
         >
           {schedule.live && <LiveBanner event={schedule.live} />}
 
-          <CoutureCrest className="mx-auto mb-2.5 h-14 w-36 lg:mx-0" />
+          <div className="mb-2 flex flex-col items-center gap-1 lg:items-start">
+            <span lang="bn" className="font-bengali text-sm font-semibold tracking-wider text-sindoor/85">
+              ॥ শুভ বিবাহ ॥
+            </span>
+            <ToporMukutEmblem className="h-14 w-40" />
+          </div>
 
           {GUEST.name && (
             <motion.p
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.05, ease: LUXURY_EASE }}
-              className="mb-2 break-words font-script text-3xl text-sindoor/90 sm:text-4xl"
+              className={`mb-2 break-words text-sindoor/90 ${
+                lang === 'bn' ? 'font-bengali text-2xl sm:text-3xl' : 'font-script text-3xl sm:text-4xl'
+              }`}
             >
-              Dearest {GUEST.name},
+              {lang === 'bn' ? `প্রিয় ${GUEST.name},` : `Dearest ${GUEST.name},`}
             </motion.p>
           )}
 
@@ -100,18 +121,22 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.1, ease: LUXURY_EASE }}
-            className="font-sans text-[11px] font-semibold uppercase tracking-[0.28em] text-kansa-muted"
+            className={
+              lang === 'bn'
+                ? 'font-bengali text-sm font-semibold text-kansa-muted'
+                : 'font-sans text-[11px] font-semibold uppercase tracking-[0.28em] text-kansa-muted'
+            }
           >
-            {WEDDING_DATA.poem.eyebrow}
+            {lang === 'bn' ? 'সপরিবারে সাদর আমন্ত্রণ' : WEDDING_DATA.poem.eyebrow}
           </motion.p>
 
           <motion.h1
             initial={{ opacity: 0, y: 18, filter: 'blur(4px)' }}
             animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
             transition={{ duration: 0.9, delay: 0.2, ease: LUXURY_EASE }}
-            className="mt-2.5 pb-2 font-script text-6xl leading-[1.05] text-sindoor sm:text-7xl xl:text-8xl"
+            className="mt-2.5 pb-2 font-script text-6xl leading-[1.18] text-sindoor sm:text-7xl xl:text-8xl"
           >
-            <span className="foil-text">
+            <span className="foil-text inline-block px-2 py-1">
               {WEDDING_DATA.couple.groom} &amp; {WEDDING_DATA.couple.bride}
             </span>
           </motion.h1>
@@ -121,21 +146,12 @@ export default function HeroSection() {
               lang="bn"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 1, delay: 0.45 }}
+              transition={{ duration: 1, delay: 0.4 }}
               className="font-bengali text-lg font-medium tracking-wide text-kansa-muted sm:text-xl"
             >
               {WEDDING_DATA.couple.bengaliNames}
             </motion.p>
           )}
-
-          <motion.p
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3, ease: LUXURY_EASE }}
-            className="mt-1.5 font-serif text-2xl italic text-ink/80 sm:text-3xl"
-          >
-            {WEDDING_DATA.poem.title}
-          </motion.p>
 
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -225,16 +241,27 @@ export default function HeroSection() {
               onClick={() => soundEngine.playSoftTick()}
               className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-sindoor px-6 py-3 font-sans text-xs font-semibold uppercase tracking-[0.2em] text-ivory shadow-md transition-[transform,background-color,box-shadow] active:scale-[0.97] hover:-translate-y-0.5 hover:bg-sindoor-deep hover:shadow-lg"
             >
-              <Sparkles aria-hidden="true" className="h-4 w-4 text-kansa-light" />
-              Explore All 5 Events
+              The Ceremony
             </a>
-            <a
-              href="#rsvp"
-              onClick={() => soundEngine.playSoftTick()}
-              className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-sindoor bg-ivory px-6 py-3 font-sans text-xs font-semibold uppercase tracking-[0.2em] text-sindoor transition-[transform,background-color,box-shadow] active:scale-[0.97] hover:-translate-y-0.5 hover:bg-cream"
+            <motion.button
+              type="button"
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.94 }}
+              onClick={(e) => {
+                soundEngine.playShankha();
+                const r = e.currentTarget.getBoundingClientRect();
+                window.dispatchEvent(
+                  new CustomEvent('wedding-petal-burst', {
+                    detail: { x: r.left + r.width / 2, y: r.top + r.height / 2 },
+                  })
+                );
+              }}
+              aria-label="Sound the auspicious Shankha conch shell"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-kansa/70 bg-cream/85 px-4 py-3 font-sans text-xs font-semibold uppercase tracking-[0.18em] text-sindoor shadow-sm transition-colors hover:bg-kansa/20"
             >
-              RSVP Now
-            </a>
+              <ShankhaIcon className="h-4 w-4 text-sindoor" />
+              <span>Shankha</span>
+            </motion.button>
           </motion.div>
         </motion.div>
 
@@ -278,7 +305,7 @@ export default function HeroSection() {
               <RoyalArtwork variant="floral-kalash" />
             </div>
             <p className="py-1 text-center font-sans text-[10px] font-semibold uppercase tracking-[0.2em] text-ivory">
-              Five Celebrations
+              Shubho Biye
             </p>
           </motion.div>
         </motion.div>
@@ -287,7 +314,7 @@ export default function HeroSection() {
       {/* Ornamental Divider Strip */}
       <div className="w-full overflow-hidden border-y border-kansa/45 bg-sindoor py-2.5">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-4 px-4 text-ivory/90 sm:gap-6">
-          {[WEDDING_DATA.couple.hashtag, '16 February 2027', WEDDING_DATA.couple.city, 'Five Celebrations'].map(
+          {[WEDDING_DATA.couple.hashtag, WEDDING_DATA.couple.weddingDateLabel, WEDDING_DATA.couple.city, 'Shubho Biye'].map(
             (text, i) => (
               <div key={text} className="flex items-center gap-4">
                 <span className="font-sans text-[11px] uppercase tracking-[0.24em]">

@@ -1,5 +1,5 @@
 import { useId } from 'react';
-import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } from 'framer-motion';
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 
 /**
  * Layered fine-art Indian heritage wedding illustrations.
@@ -914,7 +914,7 @@ const VARIANTS = {
 
 export default function RoyalArtwork({ variant = 'palace-courtyard', className = '', interactive = false }) {
   const u = `ra${useId().replace(/:/g, '')}`;
-  const reduce = useReducedMotion();
+  const reduce = false;
   const parallax = interactive && !reduce;
 
   const px = useMotionValue(0);

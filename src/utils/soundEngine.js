@@ -15,6 +15,7 @@ class WeddingSoundEngine {
     this.sfxEnabled = true;
     this.loopTimer = null;
     this.audioEl = null;
+    this.shankhaEl = null;
     this.usingMp3 = false;
     this.beatIndex = 0;
     this.pausedByVisibility = false;
@@ -62,7 +63,7 @@ class WeddingSoundEngine {
       this.ctx = new AudioCtx();
 
       this.master = this.ctx.createGain();
-      this.master.gain.setValueAtTime(0.8, this.ctx.currentTime);
+      this.master.gain.setValueAtTime(1.2, this.ctx.currentTime);
       this.master.connect(this.ctx.destination);
 
       // Lush warm hall reverb bus
@@ -196,8 +197,8 @@ class WeddingSoundEngine {
       if (!this.audioEl || this.audioEl.src !== trackUrl) {
         this.audioEl = new Audio(trackUrl);
         this.audioEl.loop = true;
-        this.audioEl.volume = 0.55;
       }
+      this.audioEl.volume = 0.04;
       await this.audioEl.play();
       this.usingMp3 = true;
       return;
@@ -235,15 +236,15 @@ class WeddingSoundEngine {
 
       // Gentle rolling piano arpeggio across chord tones
       const arpNote = chord[step % 4];
-      this.playWarmPiano(arpNote, 2.3, step % 8 === 0 ? 0.068 : 0.042);
+      this.playWarmPiano(arpNote, 2.3, step % 8 === 0 ? 0.03 : 0.018);
       if (step % 8 === 0) {
-        this.playWarmPiano(chord[0] / 2, 3.6, 0.048); // Warm bass root
+        this.playWarmPiano(chord[0] / 2, 3.6, 0.022); // Warm bass root
       }
 
       // Lyrical lead line
       const melodyNote = lead[step];
       if (melodyNote) {
-        this.playLeadMelody(melodyNote, 1.85, 0.042);
+        this.playLeadMelody(melodyNote, 1.85, 0.018);
       }
 
       this.beatIndex += 1;
@@ -257,6 +258,11 @@ class WeddingSoundEngine {
     this.isPlaying = false;
     if (this.audioEl) {
       this.audioEl.pause();
+      this.audioEl.volume = 0.04;
+    }
+    if (this.shankhaEl) {
+      this.shankhaEl.pause();
+      this.shankhaEl.currentTime = 0;
     }
     if (this.loopTimer) {
       clearInterval(this.loopTimer);
@@ -345,11 +351,45 @@ class WeddingSoundEngine {
     });
   }
 
-  /* Shankha (conch) — the auspicious Bengali call. A breathy, horn-like
-     sustained tone with a formant filter, slow swell and a final upward
-     lift, blown twice. */
-  playShankha() {
-    if (!this.sfxEnabled) return;
+  /* Shankha (conch) — plays the authentic self-hosted `./shankha.mp3`
+     recording while softly ducking the background song, falling back to
+     a warm synthesized conch call if offline or blocked. */
+  async playShankha() {
+    if (!this.sfxEnabled || typeof window === 'undefined') return;
+
+    const restoreMusicVolume = () => {
+      if (this.audioEl) this.audioEl.volume = 0.04;
+    };
+
+    const shankhaUrl = new URL(
+      WEDDING_DATA?.couple?.shankhaUrl || './shankha.mp3',
+      document.baseURI,
+    ).href;
+
+    try {
+      if (!this.shankhaEl || this.shankhaEl.src !== shankhaUrl) {
+        this.shankhaEl = new Audio(shankhaUrl);
+        this.shankhaEl.preload = 'auto';
+        this.shankhaEl.addEventListener('ended', restoreMusicVolume);
+        this.shankhaEl.addEventListener('pause', restoreMusicVolume);
+        this.shankhaEl.addEventListener('error', restoreMusicVolume);
+      }
+      this.shankhaEl.currentTime = 0;
+      this.shankhaEl.volume = 0.65;
+      if (this.audioEl && this.isPlaying) {
+        this.audioEl.volume = 0.012;
+      }
+      await this.shankhaEl.play();
+      return;
+    } catch {
+      restoreMusicVolume();
+    }
+
+    this.playShankhaSynth();
+  }
+
+  /* Warm Web Audio conch fallback if audio file cannot be played. */
+  playShankhaSynth() {
     const ctx = this.ensureContext();
     if (!ctx) return;
 
@@ -357,38 +397,38 @@ class WeddingSoundEngine {
       const t = ctx.currentTime + start;
       const out = ctx.createGain();
       out.gain.setValueAtTime(0.0001, t);
-      out.gain.linearRampToValueAtTime(0.11, t + 0.32);
-      out.gain.setValueAtTime(0.11, t + dur - 0.45);
+      out.gain.linearRampToValueAtTime(0.09, t + 0.36);
+      out.gain.setValueAtTime(0.09, t + dur - 0.5);
       out.gain.exponentialRampToValueAtTime(0.0001, t + dur);
 
-      // Formants give the hollow conch-shell colour
+      // Rounded resonant conch formants without harshness
       const f1 = ctx.createBiquadFilter();
-      f1.type = 'bandpass';
-      f1.frequency.setValueAtTime(720, t);
-      f1.Q.setValueAtTime(3.2, t);
+      f1.type = 'lowpass';
+      f1.frequency.setValueAtTime(680, t);
+      f1.Q.setValueAtTime(2.0, t);
       const f2 = ctx.createBiquadFilter();
       f2.type = 'bandpass';
-      f2.frequency.setValueAtTime(1180, t);
-      f2.Q.setValueAtTime(5, t);
+      f2.frequency.setValueAtTime(460, t);
+      f2.Q.setValueAtTime(2.6, t);
       const f2Gain = ctx.createGain();
-      f2Gain.gain.setValueAtTime(0.5, t);
+      f2Gain.gain.setValueAtTime(0.42, t);
 
       const vib = ctx.createOscillator();
       const vibGain = ctx.createGain();
-      vib.frequency.setValueAtTime(5.2, t);
-      vibGain.gain.setValueAtTime(2.2, t);
+      vib.frequency.setValueAtTime(4.6, t);
+      vibGain.gain.setValueAtTime(1.6, t);
       vib.connect(vibGain);
 
       [1, 2, 3].forEach((h) => {
         const osc = ctx.createOscillator();
-        osc.type = h === 1 ? 'sawtooth' : 'triangle';
-        osc.frequency.setValueAtTime(base * h * 0.985, t);
-        osc.frequency.linearRampToValueAtTime(base * h, t + 0.3);
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(base * h * 0.988, t);
+        osc.frequency.linearRampToValueAtTime(base * h, t + 0.32);
         osc.frequency.setValueAtTime(base * h, t + dur - 0.55);
-        osc.frequency.linearRampToValueAtTime(base * h * 1.06, t + dur - 0.1); // the lift
+        osc.frequency.linearRampToValueAtTime(base * h * 1.04, t + dur - 0.12);
         vibGain.connect(osc.frequency);
         const g = ctx.createGain();
-        g.gain.setValueAtTime(1 / (h * 1.4), t);
+        g.gain.setValueAtTime(1 / (h * 1.6), t);
         osc.connect(g);
         g.connect(f1);
         g.connect(f2);
@@ -396,11 +436,14 @@ class WeddingSoundEngine {
         osc.stop(t + dur + 0.05);
       });
 
-      // Breath noise
+      // Gentle enveloped breath attack only
       const len = Math.floor(ctx.sampleRate * dur);
       const buf = ctx.createBuffer(1, len, ctx.sampleRate);
       const data = buf.getChannelData(0);
-      for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * 0.35;
+      for (let i = 0; i < len; i++) {
+        const env = Math.sin((Math.PI * i) / len);
+        data[i] = (Math.random() * 2 - 1) * 0.06 * env;
+      }
       const noise = ctx.createBufferSource();
       noise.buffer = buf;
       noise.connect(f1);
@@ -416,7 +459,7 @@ class WeddingSoundEngine {
       noise.stop(t + dur);
     };
 
-    blow(0, 1.6, 233.08); // B♭3
+    blow(0, 1.6, 233.08);
     blow(1.85, 2.4, 233.08);
   }
 

@@ -24,7 +24,7 @@ export default function Toaster() {
     <div
       role="status"
       aria-live="polite"
-      className="pointer-events-none fixed inset-x-0 bottom-24 z-[70] flex justify-center px-4 sm:bottom-8"
+      className="pointer-events-none fixed inset-x-0 bottom-24 z-[70] flex justify-center px-4"
     >
       <AnimatePresence>
         {msg && (

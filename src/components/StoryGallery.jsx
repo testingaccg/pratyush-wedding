@@ -5,10 +5,12 @@ import { WEDDING_DATA } from '../data/weddingData';
 import RoyalArtwork from './RoyalArtwork';
 import { soundEngine } from '../utils/soundEngine';
 import { useModal } from '../utils/useModal';
+import { useLang } from '../context/LangContext';
 
 const LUXURY_EASE = [0.22, 1, 0.36, 1];
 
 export default function StoryGallery() {
+  const { lang } = useLang();
   const [activeIdx, setActiveIdx] = useState(null);
 
   const openAt = (idx) => {
@@ -53,22 +55,22 @@ export default function StoryGallery() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-80px' }}
+          viewport={{ once: true, amount: 'some' }}
           transition={{ duration: 0.7, ease: LUXURY_EASE }}
           className="text-center"
         >
-          <p className="font-sans text-[11px] font-semibold uppercase tracking-[0.28em] text-kansa-muted">
-            Our Journey
+          <p className={lang === 'bn' ? 'font-bengali text-sm font-semibold text-sindoor' : 'font-sans text-[11px] font-semibold uppercase tracking-[0.28em] text-kansa-muted'}>
+            {lang === 'bn' ? 'আমাদের পথচলা' : 'Our Journey'}
           </p>
           <h2 className="mt-2 font-serif text-4xl font-semibold text-sindoor sm:text-5xl">
-            Moments We Cherish
+            {lang === 'bn' ? <span lang="bn" className="font-bengali">স্মৃতির অ্যালবাম</span> : 'Moments We Cherish'}
           </h2>
           <p className="mx-auto mt-3 max-w-xl font-serif text-lg italic text-ink/75">
             Glimpses into our story—from unscripted laughs to the promises that carry us forward.
           </p>
         </motion.div>
 
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-12 grid gap-6 sm:grid-cols-2">
           {WEDDING_DATA.gallery.map((item, idx) => (
             <motion.button
               key={item.id}
@@ -76,7 +78,7 @@ export default function StoryGallery() {
               aria-label={`Open story ${idx + 1}: ${item.title}`}
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-40px' }}
+              viewport={{ once: true, amount: 'some' }}
               transition={{ duration: 0.6, delay: idx * 0.06, ease: LUXURY_EASE }}
               whileHover={{ y: -5 }}
               className="group relative overflow-hidden rounded-sm border border-kansa/45 bg-ivory p-3 text-left shadow-sm transition-shadow hover:shadow-xl"
@@ -87,10 +89,18 @@ export default function StoryGallery() {
                 className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-kansa-light/25 to-transparent transition-transform duration-1000 group-hover:translate-x-full"
               />
               <div className="relative aspect-[4/3] overflow-hidden bg-indigoNight">
-                <RoyalArtwork
-                  variant={item.variant}
-                  className="transition-transform duration-700 group-hover:scale-105"
-                />
+                {item.image ? (
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                ) : (
+                  <RoyalArtwork
+                    variant={item.variant}
+                    className="transition-transform duration-700 group-hover:scale-105"
+                  />
+                )}
                 <span className="absolute left-2.5 top-2.5 rounded-full bg-sindoor/90 px-2.5 py-0.5 font-sans text-[10px] font-semibold uppercase tracking-[0.16em] text-ivory">
                   {item.id} · {item.location}
                 </span>
@@ -168,7 +178,15 @@ export default function StoryGallery() {
                     transition={{ duration: 0.4, ease: LUXURY_EASE }}
                     className="h-full w-full"
                   >
-                    <RoyalArtwork variant={WEDDING_DATA.gallery[activeIdx].variant} />
+                    {WEDDING_DATA.gallery[activeIdx].image ? (
+                      <img
+                        src={WEDDING_DATA.gallery[activeIdx].image}
+                        alt={WEDDING_DATA.gallery[activeIdx].title}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <RoyalArtwork variant={WEDDING_DATA.gallery[activeIdx].variant} />
+                    )}
                   </motion.div>
                 </AnimatePresence>
                 <span className="absolute bottom-3 left-3 rounded-full bg-sindoor/90 px-3 py-1 font-sans text-[10px] font-semibold uppercase tracking-[0.2em] text-ivory">
@@ -238,7 +256,11 @@ export default function StoryGallery() {
                       : 'border-ivory/25 opacity-60 hover:opacity-100'
                   }`}
                 >
-                  <RoyalArtwork variant={g.variant} />
+                  {g.image ? (
+                    <img src={g.image} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <RoyalArtwork variant={g.variant} />
+                  )}
                 </button>
               ))}
             </div>

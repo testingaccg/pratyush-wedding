@@ -1,15 +1,20 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { soundEngine } from '../utils/soundEngine';
 
-/** Hand-drawn rose petal cluster, matching the canvas petals. */
+/** Hand-drawn Bengali Shiuli flower & rose petal cluster, matching the canvas. */
 function PetalIcon() {
   return (
     <svg viewBox="0 0 24 24" className="h-[22px] w-[22px]" aria-hidden="true">
-      <ellipse cx="9" cy="13" rx="4.2" ry="6.8" transform="rotate(-28 9 13)" fill="#E89BA7" />
-      <ellipse cx="15" cy="11.5" rx="3.8" ry="6.2" transform="rotate(24 15 11.5)" fill="#F2C6C2" />
-      <ellipse cx="12" cy="9" rx="2.6" ry="4.6" fill="#E6CA7E" />
-      <path d="M12 5.5 V12" stroke="#C59B38" strokeWidth="0.8" strokeLinecap="round" />
+      <ellipse cx="8" cy="14" rx="3.8" ry="6.2" transform="rotate(-28 8 14)" fill="#E89BA7" />
+      <ellipse cx="16" cy="13" rx="3.4" ry="5.6" transform="rotate(24 16 13)" fill="#F2C6C2" />
+      {/* Shiuli flower at top-center */}
+      <g transform="translate(12 9)">
+        {[0, 72, 144, 216, 288].map((deg) => (
+          <ellipse key={deg} cx="0" cy="-3.2" rx="1.6" ry="2.6" transform={`rotate(${deg})`} fill="#FAF7F2" stroke="#C59B38" strokeWidth="0.35" />
+        ))}
+        <circle cx="0" cy="0" r="1.4" fill="#D95D24" />
+      </g>
     </svg>
   );
 }
@@ -23,7 +28,7 @@ export default function PetalButton() {
   const [blessings, setBlessings] = useState(108);
   const [showLabel, setShowLabel] = useState(true);
   const btnRef = useRef(null);
-  const reduced = useReducedMotion();
+  const reduced = false;
 
   useEffect(() => {
     const t = setTimeout(() => setShowLabel(false), 4500);
@@ -89,9 +94,9 @@ export default function PetalButton() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: reduced ? 0 : -6 }}
             transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
-            className="pointer-events-none rounded-full border border-kansa/55 bg-ivory/95 px-3.5 py-2 font-sans text-[10px] font-semibold uppercase tracking-[0.18em] text-sindoor shadow-lg backdrop-blur-md"
+            className="pointer-events-none max-w-[calc(100vw-7.5rem)] truncate rounded-full border border-kansa/55 bg-ivory/95 px-3.5 py-2 font-sans text-[10px] font-semibold uppercase tracking-[0.18em] text-sindoor shadow-lg backdrop-blur-md"
           >
-            Tap to shower petals
+            শুভ আশীর্বাদ · Shower Shiuli &amp; Petals
           </motion.span>
         )}
       </AnimatePresence>

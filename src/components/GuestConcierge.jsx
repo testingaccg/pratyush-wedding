@@ -104,47 +104,57 @@ export default function GuestConcierge() {
 
       <WeekendGlance />
 
-      <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {WEDDING_DATA.concierge.map((item, idx) => {
-          const isHashtag = item.value === WEDDING_DATA.couple.hashtag;
-          return (
-            <motion.div
-              key={item.label}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 'some' }}
-              transition={{ duration: 0.55, delay: idx * 0.08, ease: LUXURY_EASE }}
-              className="alpona-frame flex flex-col bg-ivory p-5 shadow-sm transition-shadow hover:shadow-md"
-            >
-              <p className="font-sans text-[10px] font-semibold uppercase tracking-[0.22em] text-kansa-muted">{item.label}</p>
-              <h3 className="mt-2 break-words font-serif text-xl font-semibold text-sindoor">{item.value}</h3>
-              <p className="mt-2 font-sans text-xs leading-relaxed text-ink/75">{item.detail}</p>
-              {isHashtag && (
-                <motion.button
-                  type="button"
-                  whileTap={{ scale: 0.95 }}
-                  onClick={copyHashtag}
-                  aria-label={`Copy ${WEDDING_DATA.couple.hashtag} to clipboard`}
-                  className="mt-4 inline-flex min-h-[44px] items-center justify-center gap-2 self-start rounded-full border border-kansa bg-cream px-4 font-sans text-[11px] font-semibold uppercase tracking-[0.18em] text-sindoor transition-colors hover:bg-kansa/20"
-                >
-                  <AnimatePresence mode="wait" initial={false}>
-                    <motion.span
-                      key={copied ? 'done' : 'copy'}
-                      initial={{ opacity: 0, scale: 0.6 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.6 }}
-                      transition={{ duration: 0.18 }}
-                      className="inline-flex"
-                    >
-                      {copied ? <Check aria-hidden="true" className="h-3.5 w-3.5" /> : <Copy aria-hidden="true" className="h-3.5 w-3.5" />}
-                    </motion.span>
-                  </AnimatePresence>
-                  {copied ? 'Copied' : 'Copy Hashtag'}
-                </motion.button>
-              )}
-            </motion.div>
-          );
-        })}
+      <div className="mt-12 border-y border-kansa/40 bg-ivory/70 px-6 py-8 sm:px-10">
+        <div className="grid gap-x-10 gap-y-8 md:grid-cols-2">
+          {WEDDING_DATA.concierge.map((item, idx) => {
+            const isHashtag = item.value === WEDDING_DATA.couple.hashtag;
+            return (
+              <motion.div
+                key={item.label}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 'some' }}
+                transition={{ duration: 0.55, delay: idx * 0.07, ease: LUXURY_EASE }}
+                className="flex flex-col justify-between border-b border-kansa/20 pb-6 last:border-b-0 md:nth-last-2:border-b-0"
+              >
+                <div>
+                  <p className="font-sans text-[10px] font-semibold uppercase tracking-[0.24em] text-kansa-muted">
+                    0{idx + 1} · {item.label}
+                  </p>
+                  <h3 className="mt-1.5 break-words font-serif text-2xl font-semibold text-sindoor">
+                    {item.value}
+                  </h3>
+                  <p className="mt-2 font-serif text-base leading-relaxed text-ink/80">
+                    {item.detail}
+                  </p>
+                </div>
+                {isHashtag && (
+                  <motion.button
+                    type="button"
+                    whileTap={{ scale: 0.95 }}
+                    onClick={copyHashtag}
+                    aria-label={`Copy ${WEDDING_DATA.couple.hashtag} to clipboard`}
+                    className="mt-4 inline-flex min-h-[44px] items-center justify-center gap-2 self-start rounded-full border border-kansa bg-cream px-4 font-sans text-[11px] font-semibold uppercase tracking-[0.18em] text-sindoor transition-colors hover:bg-kansa/20"
+                  >
+                    <AnimatePresence mode="wait" initial={false}>
+                      <motion.span
+                        key={copied ? 'done' : 'copy'}
+                        initial={{ opacity: 0, scale: 0.6 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.6 }}
+                        transition={{ duration: 0.18 }}
+                        className="inline-flex"
+                      >
+                        {copied ? <Check aria-hidden="true" className="h-3.5 w-3.5" /> : <Copy aria-hidden="true" className="h-3.5 w-3.5" />}
+                      </motion.span>
+                    </AnimatePresence>
+                    {copied ? 'Copied' : 'Copy Hashtag'}
+                  </motion.button>
+                )}
+              </motion.div>
+            );
+          })}
+        </div>
       </div>
     </section>
   );

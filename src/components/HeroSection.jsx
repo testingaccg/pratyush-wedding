@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import { Calendar, Sparkles, MapPin } from 'lucide-react';
+import { Calendar, MapPin } from 'lucide-react';
 import { WEDDING_DATA } from '../data/weddingData';
 import RoyalArtwork from './RoyalArtwork';
-import CoutureCrest from './CoutureCrest';
+import { AlponaMandala, ToporMukutEmblem, ShankhaIcon } from './BengaliMotifs';
 import { soundEngine } from '../utils/soundEngine';
 import { GUEST } from '../utils/guest';
 import { getSchedule, now } from '../utils/schedule';
@@ -73,7 +73,19 @@ export default function HeroSection() {
 
   return (
     <header ref={heroRef} className="relative overflow-hidden">
-      <div className="mx-auto grid max-w-6xl items-center gap-8 px-4 py-7 sm:py-10 lg:grid-cols-12 lg:gap-10 lg:py-11">
+      {/* Rotating Bengali Alpona Mandalas in the background */}
+      <AlponaMandala
+        className="absolute -left-24 -top-20 hidden h-72 w-72 lg:block"
+        opacity={0.14}
+        duration={95}
+      />
+      <AlponaMandala
+        className="absolute -right-24 bottom-4 hidden h-64 w-64 sm:block sm:h-80 sm:w-80"
+        opacity={0.16}
+        duration={110}
+      />
+
+      <div className="relative mx-auto grid max-w-6xl items-center gap-8 px-4 py-7 sm:py-10 lg:grid-cols-12 lg:gap-10 lg:py-11">
         {/* Left Editorial Column */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -83,7 +95,12 @@ export default function HeroSection() {
         >
           {schedule.live && <LiveBanner event={schedule.live} />}
 
-          <CoutureCrest className="mx-auto mb-2.5 h-14 w-36 lg:mx-0" />
+          <div className="mb-2 flex flex-col items-center gap-1 lg:items-start">
+            <span lang="bn" className="font-bengali text-sm font-semibold tracking-wider text-sindoor/85">
+              ॥ শুভ বিবাহ ॥
+            </span>
+            <ToporMukutEmblem className="h-14 w-40" />
+          </div>
 
           {GUEST.name && (
             <motion.p
@@ -109,9 +126,9 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 18, filter: 'blur(4px)' }}
             animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
             transition={{ duration: 0.9, delay: 0.2, ease: LUXURY_EASE }}
-            className="mt-2.5 pb-2 font-script text-6xl leading-[1.05] text-sindoor sm:text-7xl xl:text-8xl"
+            className="mt-2.5 pb-2 font-script text-6xl leading-[1.18] text-sindoor sm:text-7xl xl:text-8xl"
           >
-            <span className="foil-text">
+            <span className="foil-text inline-block px-2 py-1">
               {WEDDING_DATA.couple.groom} &amp; {WEDDING_DATA.couple.bride}
             </span>
           </motion.h1>
@@ -225,8 +242,7 @@ export default function HeroSection() {
               onClick={() => soundEngine.playSoftTick()}
               className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-sindoor px-6 py-3 font-sans text-xs font-semibold uppercase tracking-[0.2em] text-ivory shadow-md transition-[transform,background-color,box-shadow] active:scale-[0.97] hover:-translate-y-0.5 hover:bg-sindoor-deep hover:shadow-lg"
             >
-              <Sparkles aria-hidden="true" className="h-4 w-4 text-kansa-light" />
-              Explore All 5 Events
+              The Five Rituals
             </a>
             <a
               href="#rsvp"
@@ -235,6 +251,25 @@ export default function HeroSection() {
             >
               RSVP Now
             </a>
+            <motion.button
+              type="button"
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.94 }}
+              onClick={(e) => {
+                soundEngine.playShankha();
+                const r = e.currentTarget.getBoundingClientRect();
+                window.dispatchEvent(
+                  new CustomEvent('wedding-petal-burst', {
+                    detail: { x: r.left + r.width / 2, y: r.top + r.height / 2 },
+                  })
+                );
+              }}
+              aria-label="Sound the auspicious Shankha conch shell"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-kansa/70 bg-cream/85 px-4 py-3 font-sans text-xs font-semibold uppercase tracking-[0.18em] text-sindoor shadow-sm transition-colors hover:bg-kansa/20"
+            >
+              <ShankhaIcon className="h-4 w-4 text-sindoor" />
+              <span>Shankha</span>
+            </motion.button>
           </motion.div>
         </motion.div>
 

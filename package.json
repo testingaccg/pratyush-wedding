@@ -1,12 +1,13 @@
 {
-  "name": "pratyush-pratyusha-wedding",
+  "name": "pratyush-sayanee-wedding",
   "private": true,
   "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "serve": "vite build && vite preview --host --port 5173"
   },
   "dependencies": {
     "framer-motion": "^11.11.17",

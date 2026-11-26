@@ -8,15 +8,15 @@ export default function AmbientCanvas() {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     let animId;
-    const reduceMq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const reduceMq = { matches: false };
     let W = window.innerWidth;
     let H = window.innerHeight;
 
-    // Crisp on Retina screens: scale the backing store by devicePixelRatio (capped at 2).
+    // Scale backing store by devicePixelRatio (capped at 1 on mobile, 1.5 on desktop for smooth 60fps).
     const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
       W = window.innerWidth;
       H = window.innerHeight;
+      const dpr = W < 640 ? 1 : Math.min(window.devicePixelRatio || 1, 1.5);
       canvas.width = W * dpr;
       canvas.height = H * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -24,18 +24,36 @@ export default function AmbientCanvas() {
     resize();
     window.addEventListener('resize', resize);
 
-    const count = window.innerWidth < 640 ? 20 : 32;
+    const count = window.innerWidth < 640 ? 10 : 22;
     const particles = Array.from({ length: count }, (_, i) => ({
       x: Math.random() * W,
       y: Math.random() * H,
-      size: i % 3 === 0 ? 5 + Math.random() * 4.5 : 1.5 + Math.random() * 2.2,
+      size: i % 4 === 0 ? 5.5 + Math.random() * 3.5 : i % 3 === 0 ? 5 + Math.random() * 4.5 : 1.5 + Math.random() * 2.2,
       speedY: 0.25 + Math.random() * 0.42,
       speedX: (Math.random() - 0.5) * 0.32,
       rot: Math.random() * Math.PI * 2,
       rotSpeed: (Math.random() - 0.5) * 0.014,
-      isPetal: i % 3 === 0,
-      opacity: 0.2 + Math.random() * 0.34,
+      kind: i % 4 === 0 ? 'shiuli' : i % 3 === 0 ? 'petal' : 'gold',
+      opacity: i % 4 === 0 ? 0.42 + Math.random() * 0.28 : 0.2 + Math.random() * 0.34,
     }));
+
+    const drawShiuli = (size) => {
+      // Iconic Bengali Shiuli (Parijat) flower: 5 ivory petals + coral-orange center
+      ctx.fillStyle = '#FFFDF9';
+      const dist = size * 0.62;
+      const rx = size * 0.28;
+      const ry = size * 0.5;
+      for (let k = 0; k < 5; k++) {
+        const a = (k * Math.PI * 2) / 5;
+        ctx.beginPath();
+        ctx.ellipse(Math.sin(a) * dist, -Math.cos(a) * dist, rx, ry, a, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.fillStyle = '#D95D24';
+      ctx.beginPath();
+      ctx.arc(0, 0, size * 0.24, 0, Math.PI * 2);
+      ctx.fill();
+    };
 
     const bursts = [];
 
@@ -66,6 +84,10 @@ export default function AmbientCanvas() {
     window.addEventListener('wedding-petal-burst', onBurst);
 
     const draw = () => {
+      if (document.hidden) {
+        animId = null;
+        return;
+      }
       ctx.clearRect(0, 0, W, H);
 
       // Reduced motion: no ambient drift — only user-triggered bursts are drawn.
@@ -86,7 +108,9 @@ export default function AmbientCanvas() {
         ctx.rotate(p.rot);
         ctx.globalAlpha = p.opacity;
 
-        if (p.isPetal) {
+        if (p.kind === 'shiuli') {
+          drawShiuli(p.size);
+        } else if (p.kind === 'petal') {
           ctx.fillStyle = '#E8B4BC';
           ctx.beginPath();
           ctx.ellipse(0, 0, p.size, p.size * 0.58, 0, 0, Math.PI * 2);
@@ -117,19 +141,31 @@ export default function AmbientCanvas() {
         ctx.translate(b.x, b.y);
         ctx.rotate(b.rot);
         ctx.globalAlpha = Math.max(0, b.life);
-        ctx.fillStyle = b.isGold ? '#E6CA7E' : '#E89BA7';
-        ctx.beginPath();
-        ctx.ellipse(0, 0, b.size, b.size * 0.55, 0, 0, Math.PI * 2);
-        ctx.fill();
+        if (i % 4 === 0) {
+          drawShiuli(b.size * 0.9);
+        } else {
+          ctx.fillStyle = b.isGold ? '#E6CA7E' : '#E89BA7';
+          ctx.beginPath();
+          ctx.ellipse(0, 0, b.size, b.size * 0.55, 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
         ctx.restore();
       }
 
       animId = requestAnimationFrame(draw);
     };
 
+    const onVis = () => {
+      if (!document.hidden && !animId) {
+        animId = requestAnimationFrame(draw);
+      }
+    };
+    document.addEventListener('visibilitychange', onVis);
+
     animId = requestAnimationFrame(draw);
     return () => {
       cancelAnimationFrame(animId);
+      document.removeEventListener('visibilitychange', onVis);
       window.removeEventListener('resize', resize);
       window.removeEventListener('wedding-petal-burst', onBurst);
     };

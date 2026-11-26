@@ -390,7 +390,7 @@ export default function RsvpSection() {
               <p className="px-8 font-sans text-[10px] font-semibold uppercase tracking-[0.26em] text-kansa-light">
                 Royal Guest Pass · {WEDDING_DATA.couple.hashtag}
               </p>
-              <h3 id={`${uid}-pass-title`} className="mt-2 font-script text-5xl text-ivory">
+              <h3 id={`${uid}-pass-title`} className="mt-2 px-3 py-1 font-script text-5xl leading-[1.2] text-ivory">
                 {WEDDING_DATA.couple.groom} &amp; {WEDDING_DATA.couple.bride}
               </h3>
               <p className="mt-1 font-sans text-[11px] uppercase tracking-[0.22em] text-kansa-light">

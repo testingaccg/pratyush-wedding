@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 
 /**
  * Hand-drawn Bengali alpona border that draws itself as you scroll:
@@ -79,7 +79,7 @@ function Half({ progress, reduced, mirror }) {
 
 export default function FiligreeDivider() {
   const ref = useRef(null);
-  const reduced = useReducedMotion();
+  const reduced = false;
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start 98%', 'center 50%'] });
   const lotusScale = useTransform(scrollYProgress, [0, 0.35], [0.4, 1]);
   const lotusOpacity = useTransform(scrollYProgress, [0, 0.25], [0, 1]);

@@ -68,7 +68,7 @@ export default function StoryGallery() {
           </p>
         </motion.div>
 
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-12 grid gap-6 sm:grid-cols-2">
           {WEDDING_DATA.gallery.map((item, idx) => (
             <motion.button
               key={item.id}

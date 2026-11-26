@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { motion, useReducedMotion, useMotionValue, useTransform, animate } from 'framer-motion';
+import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
 import { WEDDING_DATA } from '../data/weddingData';
 import { soundEngine } from '../utils/soundEngine';
 import { GUEST } from '../utils/guest';
@@ -83,7 +83,7 @@ function DoorLeaf({ side, patternId, opening, reduced, rotateY }) {
  */
 export default function ShubhoDrishtiIntro({ onEnter }) {
   const [opening, setOpening] = useState(false);
-  const reduced = useReducedMotion();
+  const reduced = false;
   const doorRef = useRef(null);
   const entered = useRef(false);
   const patternId = `jali-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
@@ -234,15 +234,17 @@ export default function ShubhoDrishtiIntro({ onEnter }) {
           'radial-gradient(ellipse at 50% 45%, #9A1A22 0%, #781117 45%, #4A0A0E 100%)',
       }}
     >
-      {/* Rotating antique-gold mandala */}
-      <svg
+      {/* Rotating antique-gold Bengali alpona mandala */}
+      <motion.svg
         viewBox="0 0 240 240"
         style={{ width: 'min(150vw, 820px)', height: 'min(150vw, 820px)' }}
-        className={`pointer-events-none absolute text-kansa-light opacity-[0.17] ${reduced ? '' : 'animate-slow-spin'}`}
+        className="pointer-events-none absolute text-kansa-light opacity-[0.17]"
         fill="none"
         stroke="currentColor"
         strokeWidth="0.7"
         aria-hidden="true"
+        animate={reduced ? undefined : { rotate: 360 }}
+        transition={reduced ? undefined : { duration: 95, repeat: Infinity, ease: 'linear' }}
       >
         <circle cx="120" cy="120" r="116" strokeDasharray="1 3" />
         <circle cx="120" cy="120" r="108" strokeDasharray="4 4" />
@@ -254,7 +256,7 @@ export default function ShubhoDrishtiIntro({ onEnter }) {
         {Array.from({ length: 32 }).map((_, i) => (
           <circle key={`d${i}`} cx="120" cy="8" r="1.4" fill="currentColor" stroke="none" transform={`rotate(${i * 11.25} 120 120)`} />
         ))}
-      </svg>
+      </motion.svg>
 
       {/* Warm candle glow + vignette */}
       <div
@@ -295,9 +297,14 @@ export default function ShubhoDrishtiIntro({ onEnter }) {
             </p>
           </>
         ) : (
-          <p className="font-sans text-[11px] font-semibold uppercase tracking-[0.3em] text-kansa-muted">
-            The Wedding Celebration Of
-          </p>
+          <>
+            <p lang="bn" className="mb-1 font-bengali text-sm font-semibold text-sindoor">
+              ॥ শুভ বিবাহ ॥
+            </p>
+            <p className="font-sans text-[11px] font-semibold uppercase tracking-[0.3em] text-kansa-muted">
+              The Wedding Celebration Of
+            </p>
+          </>
         )}
         <div aria-hidden="true" className="mt-3 flex items-center gap-2 text-kansa">
           <span className="h-px w-10 bg-gradient-to-r from-transparent to-kansa" />
@@ -367,11 +374,11 @@ export default function ShubhoDrishtiIntro({ onEnter }) {
               transition={{ duration: 0.8, delay: opening ? 0.15 : 0, ease: EASE }}
               className="absolute inset-0 flex flex-col items-center justify-center px-3"
             >
-              <span className="font-script text-[2.4rem] leading-tight text-sindoor">
+              <span className="px-2 font-script text-[2.3rem] leading-[1.2] text-sindoor">
                 {WEDDING_DATA.couple.groom}
               </span>
               <span className="font-serif text-lg italic text-kansa-muted">&amp;</span>
-              <span className="font-script text-[2.4rem] leading-tight text-sindoor">
+              <span className="px-2 font-script text-[2.3rem] leading-[1.2] text-sindoor">
                 {WEDDING_DATA.couple.bride}
               </span>
               <span className="mt-2 font-sans text-[10px] font-semibold uppercase tracking-[0.22em] text-sindoor-deep">

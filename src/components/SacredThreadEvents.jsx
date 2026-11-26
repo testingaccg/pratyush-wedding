@@ -5,9 +5,8 @@ import {
   useScroll,
   useSpring,
   useMotionValueEvent,
-  useReducedMotion,
 } from 'framer-motion';
-import { MapPin, CalendarPlus, CalendarHeart, Sparkles, Flame } from 'lucide-react';
+import { MapPin, CalendarPlus, CalendarHeart, Flame, Volume2 } from 'lucide-react';
 import { WEDDING_DATA } from '../data/weddingData';
 import { soundEngine } from '../utils/soundEngine';
 import { googleCalendarUrl, downloadWeddingIcs } from '../utils/calendar';
@@ -99,7 +98,7 @@ function HoludReveal({ onReveal }) {
           </>
         )}
         <span className="font-serif text-lg font-bold tracking-wide text-[#9A6B00]">
-          Haldi Glow
+          Gaye Holud
         </span>
       </motion.button>
       <p className="mt-4 font-sans text-[11px] font-semibold uppercase tracking-[0.2em] text-kansa-muted">
@@ -151,7 +150,7 @@ function DholReveal({ onReveal }) {
         </svg>
       </motion.button>
       <p className="mt-4 font-sans text-[11px] font-semibold uppercase tracking-[0.2em] text-kansa-muted">
-        {beats === 0 ? 'Tap the dhol twice to strike the beat' : 'One more tap! Feel the rhythm'}
+        {beats === 0 ? 'Tap the dhak twice to strike the beat' : 'One more tap! Feel the rhythm'}
       </p>
     </div>
   );
@@ -199,7 +198,7 @@ function SaptapadiReveal({ onReveal }) {
         className="mt-5 flex h-24 w-24 items-center justify-center rounded-full border-2 border-sindoor bg-ivory text-sindoor shadow-md"
       >
         <div style={{ transform: `rotate(${-step * 51.4}deg)` }} className="text-center transition-transform">
-          <span className="block font-serif text-base font-bold">7 Vows</span>
+          <span className="block font-serif text-base font-bold">Saat Paak</span>
           <span className="font-sans text-[10px] font-semibold uppercase tracking-widest">
             {step} / 7
           </span>
@@ -255,7 +254,7 @@ function DiyaReveal({ onReveal }) {
         <Flame className={`h-10 w-10 ${lit ? 'animate-pulse text-[#FFE699]' : ''}`} />
       </motion.button>
       <p className="mt-4 font-sans text-[11px] font-semibold uppercase tracking-[0.2em] text-kansa-muted">
-        Tap to light the evening diya
+        Tap to light the evening pradip
       </p>
     </div>
   );
@@ -387,7 +386,7 @@ function Knot({ y, tied, revealed, reduced }) {
 }
 
 function SacredThread({ containerRef, itemRefs, progress, revealedIds }) {
-  const reduced = useReducedMotion();
+  const reduced = false;
   const [height, setHeight] = useState(0);
   const [knotYs, setKnotYs] = useState([]);
   const [tiedCount, setTiedCount] = useState(0);
@@ -498,7 +497,7 @@ function SacredThread({ containerRef, itemRefs, progress, revealedIds }) {
 }
 
 export default function SacredThreadEvents() {
-  const [revealedIds, setRevealedIds] = useState([]);
+  const [revealedIds, setRevealedIds] = useState(() => WEDDING_DATA.events.map((e) => e.id));
   const timelineRef = useRef(null);
   const itemRefs = useRef([]);
   const { scrollYProgress } = useScroll({
@@ -514,9 +513,12 @@ export default function SacredThreadEvents() {
     setRevealedIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
   };
 
-  const revealAll = () => {
-    soundEngine.playShubhoDrishti();
-    setRevealedIds(WEDDING_DATA.events.map((e) => e.id));
+  const playRitual = (ev) => {
+    if (ev.revealType === 'henna') soundEngine.playKansaThali();
+    else if (ev.revealType === 'holud') soundEngine.playHoludSplash();
+    else if (ev.revealType === 'dhol') soundEngine.playDhakBeat(true);
+    else if (ev.revealType === 'saptapadi') soundEngine.playShankha();
+    else soundEngine.playPradipLit();
   };
 
   return (
@@ -539,16 +541,6 @@ export default function SacredThreadEvents() {
         </p>
 
         <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
-          {revealedIds.length < WEDDING_DATA.events.length && (
-            <motion.button
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
-              onClick={revealAll}
-              className="min-h-[44px] rounded-full border border-sindoor bg-ivory px-5 font-sans text-[11px] font-semibold uppercase tracking-[0.2em] text-sindoor transition-colors hover:bg-sindoor hover:text-ivory"
-            >
-              Unveil All 5 Events
-            </motion.button>
-          )}
           <motion.button
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.96 }}
@@ -563,9 +555,6 @@ export default function SacredThreadEvents() {
             Add All 5 to Calendar (.ics)
           </motion.button>
         </div>
-        <p aria-live="polite" className="mt-3 font-sans text-[11px] font-semibold uppercase tracking-[0.2em] text-kansa-muted">
-          {revealedIds.length} of {WEDDING_DATA.events.length} rituals unveiled
-        </p>
       </motion.div>
 
       <div ref={timelineRef} className="relative mt-14 space-y-10">
@@ -602,16 +591,15 @@ export default function SacredThreadEvents() {
                     </h3>
                   </div>
 
-                  {isRevealed && (
-                    <motion.span
-                      initial={{ opacity: 0, scale: 0.85 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-kansa/55 bg-cream px-3 py-1 font-sans text-[10px] font-semibold uppercase tracking-[0.18em] text-sindoor"
-                    >
-                      <Sparkles className="h-3 w-3 text-kansa" />
-                      Unveiled
-                    </motion.span>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => playRitual(ev)}
+                    aria-label={`Play ${ev.title} ritual sound`}
+                    className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full border border-kansa/55 bg-cream px-3 py-1 font-sans text-[10px] font-semibold uppercase tracking-[0.18em] text-sindoor transition-colors hover:bg-kansa/20"
+                  >
+                    <Volume2 aria-hidden="true" className="h-3 w-3 text-kansa-muted" />
+                    Ritual Sound
+                  </button>
                 </div>
 
                 <AnimatePresence mode="wait">
@@ -678,19 +666,17 @@ export default function SacredThreadEvents() {
                           Get Directions
                         </a>
 
-                        {(
-                          <a
-                            href={googleCalendarUrl(ev)}
-                            target="_blank"
-                            rel="noreferrer"
-                            onClick={() => soundEngine.playSoftTick()}
-                            aria-label={`Add ${ev.title} to Google Calendar`}
-                            className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-kansa bg-cream px-4 font-sans text-[11px] font-semibold uppercase tracking-[0.18em] text-sindoor transition-[transform,background-color,box-shadow] active:scale-[0.97] hover:-translate-y-0.5 hover:bg-kansa/20"
-                          >
-                            <CalendarPlus aria-hidden="true" className="h-3.5 w-3.5" />
-                            Add to Calendar
-                          </a>
-                        )}
+                        <a
+                          href={googleCalendarUrl(ev)}
+                          target="_blank"
+                          rel="noreferrer"
+                          onClick={() => soundEngine.playSoftTick()}
+                          aria-label={`Add ${ev.title} to Google Calendar`}
+                          className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-kansa bg-cream px-4 font-sans text-[11px] font-semibold uppercase tracking-[0.18em] text-sindoor transition-[transform,background-color,box-shadow] active:scale-[0.97] hover:-translate-y-0.5 hover:bg-kansa/20"
+                        >
+                          <CalendarPlus aria-hidden="true" className="h-3.5 w-3.5" />
+                          Add to Calendar
+                        </a>
                       </div>
                     </motion.div>
                   )}

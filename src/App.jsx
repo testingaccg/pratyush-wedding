@@ -31,9 +31,8 @@ export default function App() {
   };
 
   return (
-    // reducedMotion="user": framer-motion drops transform/layout animation for
-    // guests with `prefers-reduced-motion: reduce`.
-    <MotionConfig reducedMotion="user">
+    // reducedMotion="never": always play full wedding animations regardless of OS setting.
+    <MotionConfig reducedMotion="never">
       <div className="relative min-h-screen bg-ivory text-ink">
         <AmbientCanvas />
 
@@ -67,7 +66,7 @@ export default function App() {
 
         <footer className="relative border-t border-kansa/45 bg-sindoor pb-28 pt-12 text-center text-ivory sm:pb-20">
           <CoutureCrest light className="mx-auto mb-2 h-14 w-36" />
-          <p className="font-script text-4xl text-ivory sm:text-5xl">
+          <p className="px-3 py-1 font-script text-4xl leading-[1.2] text-ivory sm:text-5xl">
             {WEDDING_DATA.couple.groom} &amp; {WEDDING_DATA.couple.bride}
           </p>
           {WEDDING_DATA.couple.bengaliNames && (

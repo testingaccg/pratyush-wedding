@@ -62,7 +62,7 @@ class WeddingSoundEngine {
       this.ctx = new AudioCtx();
 
       this.master = this.ctx.createGain();
-      this.master.gain.setValueAtTime(0.8, this.ctx.currentTime);
+      this.master.gain.setValueAtTime(1.2, this.ctx.currentTime);
       this.master.connect(this.ctx.destination);
 
       // Lush warm hall reverb bus
@@ -196,8 +196,8 @@ class WeddingSoundEngine {
       if (!this.audioEl || this.audioEl.src !== trackUrl) {
         this.audioEl = new Audio(trackUrl);
         this.audioEl.loop = true;
-        this.audioEl.volume = 0.55;
       }
+      this.audioEl.volume = 0.04;
       await this.audioEl.play();
       this.usingMp3 = true;
       return;
@@ -235,15 +235,15 @@ class WeddingSoundEngine {
 
       // Gentle rolling piano arpeggio across chord tones
       const arpNote = chord[step % 4];
-      this.playWarmPiano(arpNote, 2.3, step % 8 === 0 ? 0.068 : 0.042);
+      this.playWarmPiano(arpNote, 2.3, step % 8 === 0 ? 0.03 : 0.018);
       if (step % 8 === 0) {
-        this.playWarmPiano(chord[0] / 2, 3.6, 0.048); // Warm bass root
+        this.playWarmPiano(chord[0] / 2, 3.6, 0.022); // Warm bass root
       }
 
       // Lyrical lead line
       const melodyNote = lead[step];
       if (melodyNote) {
-        this.playLeadMelody(melodyNote, 1.85, 0.042);
+        this.playLeadMelody(melodyNote, 1.85, 0.018);
       }
 
       this.beatIndex += 1;

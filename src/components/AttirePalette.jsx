@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles } from 'lucide-react';
 import { soundEngine } from '../utils/soundEngine';
 
 const LOOKBOOK = [
   {
     id: 'mehendi',
-    event: '01 · Mehendi',
+    event: '01 · Aiburobhat & Mehendi',
     title: 'Garden Botanicals & Sunlit Greens',
     fabric: 'Breezy Organza, Chanderi & Floral Silhouettes',
     jewelry: 'Fresh floral jhumkas, pearls & minimal gold',
@@ -18,9 +17,9 @@ const LOOKBOOK = [
   },
   {
     id: 'haldi',
-    event: '02 · Haldi',
+    event: '02 · Gaye Holud',
     title: 'Golden Marigold & Ivory',
-    fabric: 'Breathable Cotton, Mulmul & Linen',
+    fabric: 'Breathable Cotton, Mulmul & Taant',
     jewelry: 'Shells, gotta patti & sunlit statement drops',
     swatches: [
       { name: 'Marigold', hex: '#E8B923' },
@@ -30,7 +29,7 @@ const LOOKBOOK = [
   },
   {
     id: 'sangeet',
-    event: '03 · Sangeet',
+    event: '03 · Sangeet & Ashor',
     title: 'Starlit Jewel Tones & Shimmer',
     fabric: 'Raw Silk, Sequined Georgette & Velvet',
     jewelry: 'Polki chokers, cocktail rings & metallic heels',
@@ -42,10 +41,10 @@ const LOOKBOOK = [
   },
   {
     id: 'wedding',
-    event: '04 · Wedding',
+    event: '04 · Shubho Biye',
     title: 'Timeless Crimson & Heritage Gold',
-    fabric: 'Banarasi Silk, Kanjivaram & Embroidered Sherwanis',
-    jewelry: 'Heirloom kundan, temple gold & traditional bangles',
+    fabric: 'Banarasi Silk, Garad & Embroidered Panjabis',
+    jewelry: 'Heirloom gold, shankha-pola & traditional bangles',
     swatches: [
       { name: 'Sindoor Crimson', hex: '#A61C24' },
       { name: 'Burnished Gold', hex: '#C59B38' },
@@ -54,9 +53,9 @@ const LOOKBOOK = [
   },
   {
     id: 'reception',
-    event: '05 · Reception',
+    event: '05 · Bou Bhaat',
     title: 'Candlelit Champagne & Terracotta',
-    fabric: 'Satin Drapes, Ivory Silk & Tailored Tuxedos',
+    fabric: 'Tussar Silk, Ivory Drapes & Tailored Bandhgalas',
     jewelry: 'Diamonds, delicate solitaire drops & sleek clutches',
     swatches: [
       { name: 'Terracotta', hex: '#C85A32' },
@@ -136,10 +135,9 @@ export default function AttirePalette() {
           >
             {/* Left Styling Notes */}
             <div className="md:col-span-7">
-              <div className="inline-flex items-center gap-1.5 font-sans text-[10px] font-semibold uppercase tracking-[0.24em] text-kansa-muted">
-                <Sparkles className="h-3.5 w-3.5 text-kansa" />
+              <p className="font-sans text-[10px] font-semibold uppercase tracking-[0.24em] text-kansa-muted">
                 {active.event} Lookbook
-              </div>
+              </p>
               <h3 className="mt-2 font-serif text-3xl font-semibold text-sindoor">
                 {active.title}
               </h3>
